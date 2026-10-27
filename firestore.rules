@@ -5,7 +5,7 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     // ഇവിടെ നിങ്ങളുടെ Admin Email ചെറിയ അക്ഷരത്തിൽ നൽകുക
     function isAdmin() {
-      return signedIn() && request.auth.token.get('email', '').lower() in ['PASTE_ADMIN_EMAIL'];
+      return signedIn() && request.auth.token.get('email', '').lower() in ['salmantn692@gmail.com'];
     }
     function myCls() {
       return get(/databases/$(database)/documents/sessions/$(request.auth.uid)).data.cls;
