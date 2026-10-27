@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    // ഇവിടെ നിങ്ങളുടെ Admin Email ചെറിയ അക്ഷരത്തിൽ നൽകുക
+    function isAdmin() {
+      return signedIn() && request.auth.token.get('email', '').lower() in ['PASTE_ADMIN_EMAIL'];
+    }
+    function myCls() {
+      return get(/databases/$(database)/documents/sessions/$(request.auth.uid)).data.cls;
+    }
+
+    // വിദ്യാർത്ഥി: ID അറിയുന്നവർക്ക് ആ ഒരു രേഖ മാത്രം വായിക്കാം (പട്ടിക കാണാൻ പറ്റില്ല)
+    match /students/{sid} {
+      allow get: if signedIn();
+      allow list, write: if isAdmin();
+    }
+
+    // രക്ഷിതാക്കളുടെ നമ്പറുകൾ: Admin മാത്രം
+    match /contacts/{sid} {
+      allow read, write: if isAdmin();
+    }
+
+    // ലോഗിൻ ചെയ്ത വിദ്യാർത്ഥിയുടെ ക്ലാസ് രേഖ
+    match /sessions/{uid} {
+      allow read, delete: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['sid', 'cls'])
+        && exists(/databases/$(database)/documents/students/$(request.resource.data.sid))
+        && get(/databases/$(database)/documents/students/$(request.resource.data.sid)).data.cls == request.resource.data.cls;
+    }
+
+    // ഉള്ളടക്കം: All അല്ലെങ്കിൽ വിദ്യാർത്ഥിയുടെ സ്വന്തം ക്ലാസ് മാത്രം വായിക്കാം; എഴുതാൻ Admin മാത്രം
+    match /{col}/{id} {
+      allow read: if col in ['live', 'yt', 'notes', 'ann', 'tt', 'slides']
+        && (isAdmin() || (signedIn() && (resource.data.cls == 'All' || resource.data.cls == myCls())));
+      allow write: if col in ['live', 'yt', 'notes', 'ann', 'tt', 'slides'] && isAdmin();
+    }
+  }
+}
