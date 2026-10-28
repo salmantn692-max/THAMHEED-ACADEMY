@@ -1,9 +1,10 @@
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,signInAnonymously,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import {getFirestore,collection,doc,getDoc,getDocs,setDoc,addDoc,updateDoc,deleteDoc,query,where,onSnapshot} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {initializeFirestore,collection,doc,getDoc,getDocs,setDoc,addDoc,updateDoc,deleteDoc,query,where,onSnapshot} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {firebaseConfig,ADMIN_EMAILS} from "./firebase-config.js";
 
-const fb=initializeApp(firebaseConfig),auth=getAuth(fb),db=getFirestore(fb);
+const fb=initializeApp(firebaseConfig),auth=getAuth(fb),db=initializeFirestore(fb,{experimentalAutoDetectLongPolling:true});
+const tmo=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r({code:"timeout"}),ms||10000))]);
 const $=i=>document.getElementById(i);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const safe=u=>/^https?:\/\//i.test(u||'')?esc(u):'';
@@ -38,15 +39,15 @@ async function fetchK(k){
 async function loadHome(){
   V.s='home';render();
   try{
-    const s=await getDoc(doc(db,'students',me.id));if(s.exists())me={id:me.id,...s.data()};
-    [SL,LV]=await Promise.all([fetchK('slides'),fetchK('live')]);
+    const s=await tmo(getDoc(doc(db,'students',me.id)),12000);if(s.exists())me={id:me.id,...s.data()};
+    [SL,LV]=await tmo(Promise.all([fetchK('slides'),fetchK('live')]),12000);
   }catch(e){toast('ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല')}
   render();
 }
 async function openList(k){
   V.s='list';V.k=k;LST=null;render();window.scrollTo(0,0);
   if(k==='att'){LST=[];render();return}
-  try{LST=await fetchK(k)}catch(e){LST=[];toast('ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല')}
+  try{LST=await tmo(fetchK(k),12000)}catch(e){LST=[];toast(errMsg(e,'ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'))}
   render();
 }
 function watch(){
@@ -59,7 +60,7 @@ function watch(){
 }
 
 /* ---------- auth ---------- */
-function errMsg(e){
+function errMsg(e,d){
   const c=(e&&e.code)||'';
   const m={
     'auth/operation-not-allowed':'Firebase → Authentication → Sign-in method ൽ Anonymous Enable ചെയ്തിട്ടില്ല.',
@@ -69,21 +70,22 @@ function errMsg(e){
     'auth/api-key-not-valid.-please-pass-a-valid-api-key.':'firebase-config.js ലെ apiKey ശരിയല്ല.',
     'permission-denied':'Firestore Rules പ്രസിദ്ധീകരിച്ചിട്ടില്ല, അല്ലെങ്കിൽ ശരിയല്ല.',
     'auth/network-request-failed':'ഇന്റർനെറ്റ് പരിശോധിക്കൂ.',
-    'unavailable':'ഇന്റർനെറ്റ് പരിശോധിക്കൂ.'
+    'unavailable':'ഇന്റർനെറ്റ് പരിശോധിക്കൂ.',
+    'timeout':'Firestore-മായി ബന്ധപ്പെടാൻ കഴിയുന്നില്ല. Firebase-ൽ Firestore Database ഉണ്ടാക്കിയിട്ടുണ്ടോ എന്നും ഇന്റർനെറ്റും പരിശോധിക്കൂ.'
   };
-  return (m[c]||'പ്രവേശിക്കാൻ കഴിഞ്ഞില്ല.')+(c?' ['+c+']':'');
+  return (m[c]||d||'പ്രവേശിക്കാൻ കഴിഞ്ഞില്ല.')+(c?' ['+c+']':'');
 }
 async function doLogin(){
   const id=ck($('sid').value),er=$('err');
   if(!id){er.textContent='Student ID നൽകൂ.';return}
-  er.textContent='';
+  er.textContent='കാത്തിരിക്കൂ…';
   try{
     if(auth.currentUser&&!auth.currentUser.isAnonymous){await signOut(auth);unsub.forEach(f=>f());unsub=[];adm=false;DA={};CT={}}
-    if(!auth.currentUser)await signInAnonymously(auth);
-    const s=await getDoc(doc(db,'students',id));
+    if(!auth.currentUser)await tmo(signInAnonymously(auth),12000);
+    const s=await tmo(getDoc(doc(db,'students',id)),12000);
     if(!s.exists()){er.textContent='Student ID കണ്ടെത്തിയില്ല. Academy നൽകിയ ID ശരിയായി നൽകൂ.';return}
     const st={id,...s.data()};
-    await setDoc(doc(db,'sessions',auth.currentUser.uid),{sid:id,cls:String(st.cls)});
+    await tmo(setDoc(doc(db,'sessions',auth.currentUser.uid),{sid:id,cls:String(st.cls)}),12000);
     me=st;await loadHome();
   }catch(e){console.error(e);er.textContent=errMsg(e)}
 }
@@ -187,15 +189,15 @@ async function saveI(){
       const id=ck(o.id);if(!id){toast('Student ID നൽകൂ');return}
       if(A('students').some(x=>x._id===id&&x._id!==V.ed)){toast('ഈ Student ID നേരത്തേ ഉണ്ട്');return}
       delete o.id;o.cls=String(o.cls);o.p=+o.p||0;o.t=+o.t||0;
-      await setDoc(doc(db,'students',id),{...o,ts:(old&&old.ts)||Date.now()});
+      await tmo(setDoc(doc(db,'students',id),{...o,ts:(old&&old.ts)||Date.now()}));
       if(V.ed&&V.ed!==id){await deleteDoc(doc(db,'students',V.ed));await deleteDoc(doc(db,'contacts',V.ed))}
-      if(wa)await setDoc(doc(db,'contacts',id),{phone:ph(wa)});else await deleteDoc(doc(db,'contacts',id));
+      if(wa)await tmo(setDoc(doc(db,'contacts',id),{phone:ph(wa)}));else await tmo(deleteDoc(doc(db,'contacts',id)));
     }else{
       if(s==='slides')o.img=PI||(old&&old.img)||'';
       if(s==='ann'&&!(old&&old.d))o.d=new Date().toISOString().slice(0,10);
-      if(old)await updateDoc(doc(db,s,V.ed),o);else await addDoc(collection(db,s),{...o,ts:Date.now()});
+      if(old)await tmo(updateDoc(doc(db,s,V.ed),o));else await tmo(addDoc(collection(db,s),{...o,ts:Date.now()}));
     }
-  }catch(e){toast('സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല');return}
+  }catch(e){console.error(e);toast(errMsg(e,'സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'));return}
   V.ed='';PI=null;render();toast('സേവ് ചെയ്തു ✓');
 }
 async function del(id){
@@ -242,7 +244,7 @@ function render(){
   if((V.s==='home'||V.s==='list')&&!me)V.s='login';
   if(V.s==='admin'&&!adm)V.s='login';
   const s=V.s;
-  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='admin'?admin():'<section class="scr hero green"><h1>Thamheed Academy</h1></section>';
+  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='admin'?admin():'<section class="scr hero green"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
   const nav=s==='home'||s==='list'||s==='admin';
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+'">'+h+(nav?navh():'')+'<div class="toast" id="toast"></div></div>';
   car();
@@ -251,16 +253,16 @@ Object.assign(window,{go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pic
 
 async function boot(){
   render();
-  const u=await new Promise(r=>{const f=onAuthStateChanged(auth,x=>{f();r(x)})});
+  const u=await tmo(new Promise(r=>{const f=onAuthStateChanged(auth,x=>{f();r(x)})}),8000).catch(()=>null);
   if(u&&!u.isAnonymous&&isAdm(u.email)){adm=true;watch()}
   else if(u&&u.isAnonymous){
     try{
-      const ss=await getDoc(doc(db,'sessions',u.uid));
+      const ss=await tmo(getDoc(doc(db,'sessions',u.uid)),8000);
       if(ss.exists()){
-        const s=await getDoc(doc(db,'students',ss.data().sid));
-        if(s.exists()){me={id:s.id,...s.data()};if(String(me.cls)!==ss.data().cls)await setDoc(doc(db,'sessions',u.uid),{sid:s.id,cls:String(me.cls)})}
+        const s=await tmo(getDoc(doc(db,'students',ss.data().sid)),8000);
+        if(s.exists()){me={id:s.id,...s.data()};if(String(me.cls)!==ss.data().cls)await tmo(setDoc(doc(db,'sessions',u.uid),{sid:s.id,cls:String(me.cls)}),8000)}
       }
-    }catch(e){}
+    }catch(e){console.error(e)}
   }
   if(me){await loadHome();return}
   if(adm&&location.hash!=='#admin'){go('admin');return}
