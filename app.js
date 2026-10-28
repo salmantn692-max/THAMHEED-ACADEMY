@@ -59,24 +59,40 @@ function watch(){
 }
 
 /* ---------- auth ---------- */
+function errMsg(e){
+  const c=(e&&e.code)||'';
+  const m={
+    'auth/operation-not-allowed':'Firebase → Authentication → Sign-in method ൽ Anonymous Enable ചെയ്തിട്ടില്ല.',
+    'auth/admin-restricted-operation':'Firebase → Authentication → Sign-in method ൽ Anonymous Enable ചെയ്തിട്ടില്ല.',
+    'auth/unauthorized-domain':'ഈ വെബ്സൈറ്റ് Firebase → Authentication → Settings → Authorized domains ൽ ചേർത്തിട്ടില്ല.',
+    'auth/invalid-api-key':'firebase-config.js ലെ apiKey ശരിയല്ല.',
+    'auth/api-key-not-valid.-please-pass-a-valid-api-key.':'firebase-config.js ലെ apiKey ശരിയല്ല.',
+    'permission-denied':'Firestore Rules പ്രസിദ്ധീകരിച്ചിട്ടില്ല, അല്ലെങ്കിൽ ശരിയല്ല.',
+    'auth/network-request-failed':'ഇന്റർനെറ്റ് പരിശോധിക്കൂ.',
+    'unavailable':'ഇന്റർനെറ്റ് പരിശോധിക്കൂ.'
+  };
+  return (m[c]||'പ്രവേശിക്കാൻ കഴിഞ്ഞില്ല.')+(c?' ['+c+']':'');
+}
 async function doLogin(){
   const id=ck($('sid').value),er=$('err');
   if(!id){er.textContent='Student ID നൽകൂ.';return}
+  er.textContent='';
   try{
+    if(auth.currentUser&&!auth.currentUser.isAnonymous){await signOut(auth);unsub.forEach(f=>f());unsub=[];adm=false;DA={};CT={}}
     if(!auth.currentUser)await signInAnonymously(auth);
     const s=await getDoc(doc(db,'students',id));
     if(!s.exists()){er.textContent='Student ID കണ്ടെത്തിയില്ല. Academy നൽകിയ ID ശരിയായി നൽകൂ.';return}
     const st={id,...s.data()};
     await setDoc(doc(db,'sessions',auth.currentUser.uid),{sid:id,cls:String(st.cls)});
     me=st;await loadHome();
-  }catch(e){er.textContent='പ്രവേശിക്കാൻ കഴിഞ്ഞില്ല. ഇന്റർനെറ്റ് പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കൂ.'}
+  }catch(e){console.error(e);er.textContent=errMsg(e)}
 }
 async function doAdmin(){
   try{
     const r=await signInWithEmailAndPassword(auth,$('ae').value.trim(),$('ap').value);
     if(!isAdm(r.user.email)){await signOut(auth);$('err').textContent='ഈ അക്കൗണ്ടിന് Admin അനുമതിയില്ല.';return}
     adm=true;watch();go('admin');
-  }catch(e){$('err').textContent='ലോഗിൻ പരാജയപ്പെട്ടു. Email / Password പരിശോധിക്കൂ.'}
+  }catch(e){$('err').textContent='ലോഗിൻ പരാജയപ്പെട്ടു. Email / Password പരിശോധിക്കൂ.'+(e&&e.code?' ['+e.code+']':'')}
 }
 async function out(){
   try{if(me&&auth.currentUser&&auth.currentUser.isAnonymous)await deleteDoc(doc(db,'sessions',auth.currentUser.uid))}catch(e){}
