@@ -20,9 +20,12 @@ yt:{l:'YouTube',f:[['t','തലക്കെട്ട്'],['url','YouTube Link']
 notes:{l:'നോട്സ്',f:[['t','തലക്കെട്ട്'],['url','Link'],['cls','ക്ലാസ്']]},
 ann:{l:'അറിയിപ്പുകൾ',f:[['t','തലക്കെട്ട്'],['b','വിവരം'],['cls','ക്ലാസ്']]},
 tt:{l:'ടൈം ടേബിൾ',f:[['day','ദിവസം'],['time','സമയം'],['sub','വിഷയം'],['cls','ക്ലാസ്']]},
-slides:{l:'സ്ലൈഡുകൾ',f:[['t','തലക്കെട്ട് (ഓപ്ഷണൽ)'],['url','Link (WhatsApp ഗ്രൂപ്പ് / YouTube / സൈറ്റ്)'],['cls','ക്ലാസ്']]}
+slides:{l:'സ്ലൈഡുകൾ',f:[['t','തലക്കെട്ട് (ഓപ്ഷണൽ)'],['url','Link (WhatsApp ഗ്രൂപ്പ് / YouTube / സൈറ്റ്)'],['cls','ക്ലാസ്']]},
+subjects:{l:'വിഷയങ്ങൾ',f:[['name','വിഷയം (English)'],['ar','അറബി പേര് (ഓപ്ഷണൽ)'],['cls','ക്ലാസ്'],['soon','Coming soon ആണോ?',['No','Yes']]]}
 };
 const T={live:['🔴','Live ക്ലാസ്'],yt:['▶️','YouTube ക്ലാസ്'],notes:['📚','നോട്സ്'],ann:['📢','അറിയിപ്പുകൾ'],tt:['🗓️','ടൈം ടേബിൾ'],att:['✅','ഹാജർ']};
+const EX={q:['QUARTERLY EXAM','Quarterly Question Paper','📋'],h:['HALF YEARLY EXAM','Half Year Question Paper','✅'],f:['FINAL EXAM','Final Question Paper','🎓']};
+let MP={step:'sub',sub:'',paper:''},SUBS=null,PAP=null;const PB={};
 let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},SL=[],LV=[],LST=null,PI=null,PK='',tp=0,tmr,CI,unsub=[];
 let W={m:'c',c:'1',i:0,t:'',r:false};
 const A=k=>DA[k]||[];
@@ -57,6 +60,7 @@ function watch(){
     if(V.s==='admin')refresh();
   },()=>toast('ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല'))));
   unsub.push(onSnapshot(collection(db,'contacts'),s=>{CT={};s.docs.forEach(d=>CT[d.id]=d.data().phone||'')},()=>{}));
+  unsub.push(onSnapshot(collection(db,'papers'),s=>{DA.papers=s.docs.map(d=>({_id:d.id,...d.data()})).sort((a,b)=>(a.ts||0)-(b.ts||0));if(V.s==='admin')refresh()},()=>{}));
 }
 
 /* ---------- auth ---------- */
@@ -125,7 +129,7 @@ function home(){
   const nx=LV[0],u=nx?safe(nx.url):'';
   return '<section class="scr"><div class="top"><div><small>അസ്സലാമു അലൈക്കും</small><h2>'+esc(me.name)+'</h2></div><div class="tag">ക്ലാസ് '+esc(me.cls)+'</div></div>'+carousel()
   +'<div class="promo green">'+(nx?'<small>അടുത്ത Live ക്ലാസ്</small><b>'+esc(nx.t)+'</b><small>'+esc(nx.time)+'</small>'+(u?'<br><a class="jn" href="'+u+'" target="_blank" rel="noopener">ക്ലാസിൽ ചേരൂ</a>':''):'<b>ഇപ്പോൾ Live ക്ലാസ് ഷെഡ്യൂൾ ചെയ്തിട്ടില്ല</b>')+'</div>'
-  +'<div class="sec"><h3>നിങ്ങളുടെ പഠനം</h3></div><div class="grid">'+Object.keys(T).map(k=>'<button class="cc" onclick="openList(\''+k+'\')"><div class="ic green">'+T[k][0]+'</div><b>'+T[k][1]+'</b></button>').join('')+'</div></section>';
+  +'<div class="sec"><h3>നിങ്ങളുടെ പഠനം</h3></div><div class="grid">'+Object.keys(T).map(k=>'<button class="cc" onclick="openList(\''+k+'\')"><div class="ic green">'+T[k][0]+'</div><b>'+T[k][1]+'</b></button>').join('')+'<button class="cc" onclick="openMP()"><div class="ic green">📝</div><b>Model Paper</b></button></div></section>';
 }
 function item(k,x){
   const ti=k==='tt'?x.sub:x.t,sm=k==='live'?x.time:k==='tt'?x.day+' · '+x.time:k==='ann'?(x.d||'')+' '+(x.b||''):'',u=safe(x.url);
@@ -141,7 +145,7 @@ function list(){
 }
 
 /* ---------- admin ---------- */
-const chips=()=>Object.keys(S).map(k=>'<button class="chip'+(k===V.sec?' green':'')+'" onclick="sec(\''+k+'\')">'+S[k].l+' ('+A(k).length+')</button>').join('')+'<button class="chip'+(V.sec==='wa'?' green':'')+'" onclick="sec(\'wa\')">📨 WhatsApp</button>';
+const chips=()=>Object.keys(S).map(k=>'<button class="chip'+(k===V.sec?' green':'')+'" onclick="sec(\''+k+'\')">'+S[k].l+' ('+A(k).length+')</button>').join('')+'<button class="chip'+(V.sec==='papers'?' green':'')+'" onclick="sec(\'papers\')">📝 Model Paper ('+A('papers').length+')</button><button class="chip'+(V.sec==='wa'?' green':'')+'" onclick="sec(\'wa\')">📨 WhatsApp</button>';
 function sec(k){V.sec=k;V.ed='';V.cd='';render()}
 function edit(id){V.ed=id;render()}
 function lst(){
@@ -149,7 +153,7 @@ function lst(){
   if(!a.length)return '<div class="empty">ഒന്നുമില്ല. ചേർക്കൂ.</div>';
   return a.map(x=>'<div class="ol">'+(isimg(x.img)?'<img class="th" alt="" src="'+x.img+'">':'')+'<div class="t">'+esc(x[c.f[0][0]]||(x.img?'(ചിത്ര സ്ലൈഡ്)':''))+'<small>'+esc(x[c.f[1][0]])+(c.f[2]?' · '+esc(x[c.f[2][0]]):'')+'</small></div><button class="pl" onclick="edit(\''+x._id+'\')" aria-label="Edit">✏️</button><button class="pl" onclick="del(\''+x._id+'\')" aria-label="Delete">'+(V.cd===x._id?'❗':'🗑️')+'</button></div>').join('');
 }
-function refresh(){const l=$('lst');if(l&&V.sec!=='wa')l.innerHTML=lst();const c=$('chips');if(c)c.innerHTML=chips()}
+function refresh(){const l=$('lst');if(l&&V.sec!=='wa')l.innerHTML=V.sec==='papers'?lstP():lst();const c=$('chips');if(c)c.innerHTML=chips()}
 function pick(i){
   const f=i.files&&i.files[0];if(!f)return;
   const r=new FileReader();
@@ -169,10 +173,12 @@ function admin(){
   const s=V.sec;
   let h='<section class="scr"><h2 style="margin:0 0 4px">Admin Panel</h2><p class="mu">മാറ്റങ്ങൾ ഉടൻ തന്നെ വിദ്യാർത്ഥികൾക്ക് ലഭിക്കും.</p><div class="chips" id="chips">'+chips()+'</div>';
   if(s==='wa')return h+waPanel()+'</section>';
+  if(s==='papers')return h+paperPanel()+'</section>';
   const c=S[s],e=V.ed?(A(s).find(x=>x._id===V.ed)||{}):{};
   h+='<div class="adm"><div id="lst">'+lst()+'</div><div class="fm"><h3>'+(V.ed?'തിരുത്തുക':'പുതിയത് ചേർക്കുക')+'</h3>'+c.f.map(f=>{
     const k=f[0],v=e[k]!=null?e[k]:'',n='<label for="f_'+k+'">'+f[1]+'</label>';
-    if(k==='cls'){const o=s==='students'?CL:['All'].concat(CL);return n+'<select id="f_cls">'+o.map(x=>'<option'+(String(x)===String(v)?' selected':'')+'>'+x+'</option>').join('')+'</select>'}
+    if(k==='cls'){const o=(s==='students'||s==='subjects')?CL:['All'].concat(CL);return n+'<select id="f_cls">'+o.map(x=>'<option'+(String(x)===String(v)?' selected':'')+'>'+x+'</option>').join('')+'</select>'}
+    if(f[2])return n+'<select id="f_'+k+'">'+f[2].map(x=>'<option'+(String(x)===String(v)?' selected':'')+'>'+x+'</option>').join('')+'</select>';
     if(k==='b')return n+'<textarea id="f_b" rows="3">'+esc(v)+'</textarea>';
     return n+'<input id="f_'+k+'" value="'+esc(v)+'"'+((k==='p'||k==='t')?' inputmode="numeric"':'')+'>';
   }).join('')+extra(s,e)+'<button class="cta" onclick="saveI()">'+(V.ed?'മാറ്റം സേവ് ചെയ്യുക':'ചേർക്കുക')+'</button>'+(V.ed?'<button class="cta ghost" onclick="edit(\'\')">റദ്ദാക്കുക</button>':'')+'</div></div></section>';
@@ -238,18 +244,127 @@ function waPanel(){
   return h;
 }
 
+/* ---------- Model Paper ---------- */
+const b64of=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(f)});
+const canShareFiles=()=>{try{return !!(navigator.canShare&&navigator.canShare({files:[new File([''],'a.pdf',{type:'application/pdf'})]}))}catch(e){return false}};
+async function pdfBlob(p){
+  if(PB[p._id])return PB[p._id];
+  const q=await tmo(getDocs(collection(db,'papers',p._id,'chunks')),30000);
+  const bin=atob(q.docs.sort((a,b)=>a.id<b.id?-1:1).map(d=>d.data().d).join('')),u=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  return PB[p._id]=new Blob([u],{type:'application/pdf'});
+}
+async function openMP(){
+  V.s='mp';MP={step:'sub',sub:'',paper:''};SUBS=null;PAP=null;render();window.scrollTo(0,0);
+  try{
+    const q=s=>getDocs(query(collection(db,s),where('cls','==',String(me.cls))));
+    const [a,b]=await tmo(Promise.all([q('subjects'),q('papers')]),12000);
+    SUBS=a.docs.map(d=>({_id:d.id,...d.data()}));PAP=b.docs.map(d=>({_id:d.id,...d.data()}));
+  }catch(e){SUBS=[];PAP=[];toast(errMsg(e,'ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'))}
+  render();
+}
+function mpBack(){if(MP.step==='paper'){MP.step='exam';render()}else if(MP.step==='exam'){MP.step='sub';render()}else go('home');window.scrollTo(0,0)}
+function mpSub(id){MP.sub=id;MP.step='exam';render();window.scrollTo(0,0)}
+function mpPaper(id){
+  MP.paper=id;MP.step='paper';render();window.scrollTo(0,0);
+  const p=PAP.find(x=>x._id===id);if(p&&!p.url&&p.n)pdfBlob(p).catch(()=>{});
+}
+async function mpOpen(share){
+  const p=PAP.find(x=>x._id===MP.paper),sj=SUBS.find(x=>x._id===p.sub)||{name:''};
+  if(safe(p.url)){
+    if(share&&navigator.share){try{await navigator.share({title:p.title,url:p.url});return}catch(e){}}
+    window.open(p.url,'_blank','noopener');return;
+  }
+  const direct=share&&canShareFiles(),w=direct?null:window.open('','_blank');
+  toast('ലോഡ് ചെയ്യുന്നു…');
+  try{
+    const b=await pdfBlob(p),name=(sj.name?sj.name+' - ':'')+p.title+'.pdf';
+    if(direct){await navigator.share({files:[new File([b],name,{type:'application/pdf'})],title:name});return}
+    const u=URL.createObjectURL(b);
+    if(w)w.location.href=u;else window.open(u,'_blank');
+  }catch(e){
+    if(w)w.close();
+    if(!(e&&e.name==='AbortError'))toast(errMsg(e,'തുറക്കാൻ കഴിഞ്ഞില്ല.'));
+  }
+}
+function mp(){
+  let h='<section class="scr"><div class="bar"><button onclick="mpBack()" aria-label="Back">←</button><span>Model Paper</span><span style="width:44px"></span></div>';
+  if(SUBS===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+  if(MP.step==='sub'){
+    if(!SUBS.length)return h+'<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div></section>';
+    return h+'<div class="grid">'+SUBS.map(s=>{const soon=s.soon==='Yes';return '<button class="cc sj" '+(soon?'disabled':'onclick="mpSub(\''+s._id+'\')"')+'><div class="ic green">📘</div>'+(s.ar?'<b class="ar" dir="auto">'+esc(s.ar)+'</b>':'')+'<b>'+esc(s.name)+'</b>'+(soon?'<div class="rb">COMING SOON</div>':'')+'</button>'}).join('')+'</div></section>';
+  }
+  if(MP.step==='exam'){
+    const sj=SUBS.find(x=>x._id===MP.sub)||{name:''},ps=PAP.filter(p=>p.sub===MP.sub);
+    h+='<h2 class="mh">'+esc(sj.name)+'</h2>';
+    Object.keys(EX).forEach(k=>{
+      const l=ps.filter(p=>p.exam===k);
+      h+='<div class="eh"><span>'+EX[k][2]+' '+EX[k][0]+'</span><span class="bd">'+(l.length?l.length+(l.length>1?' Papers':' Paper'):(k==='f'?'Upcoming':'—'))+'</span></div>';
+      h+=l.length?l.map((p,i)=>'<button class="px c'+(i%3)+'" onclick="mpPaper(\''+p._id+'\')"><span class="pi">PDF</span><span class="pt"><b>'+esc(p.title)+'</b><small>'+EX[k][1]+'</small></span><span>›</span></button>').join(''):'<div class="cs">Coming soon</div>';
+    });
+    return h+'</section>';
+  }
+  const p=PAP.find(x=>x._id===MP.paper)||{},sj=SUBS.find(x=>x._id===p.sub)||{name:''};
+  return h+'<div class="pd"><div class="pbig green">📄</div><h2>'+esc((sj.name?sj.name+' - ':'')+(p.title||''))+'</h2><button class="cta" onclick="mpOpen(0)">👁 Open Now</button><button class="cta ghost" onclick="mpOpen(1)">🔗 Share / Print</button></div></section>';
+}
+function lstP(){
+  const ps=A('papers'),subs=A('subjects');
+  if(!ps.length)return '<div class="empty">ഒന്നുമില്ല. ചേർക്കൂ.</div>';
+  return ps.map(p=>{const s=subs.find(x=>x._id===p.sub);return '<div class="ol"><div class="n green">📄</div><div class="t">'+esc(p.title)+'<small>'+esc(s?'ക്ലാസ് '+s.cls+' · '+s.name:'?')+' · '+esc((EX[p.exam]||[''])[0])+'</small></div><button class="pl" onclick="edit(\''+p._id+'\')" aria-label="Edit">✏️</button><button class="pl" onclick="delP(\''+p._id+'\')" aria-label="Delete">'+(V.cd===p._id?'❗':'🗑️')+'</button></div>'}).join('');
+}
+function paperPanel(){
+  const subs=A('subjects'),e=V.ed?(A('papers').find(x=>x._id===V.ed)||{}):{};
+  if(!subs.length)return '<div class="fm" style="max-width:640px"><p>ആദ്യം "വിഷയങ്ങൾ" ടാബിൽ ക്ലാസും വിഷയവും ചേർക്കൂ.</p></div>';
+  return '<div class="adm"><div id="lst">'+lstP()+'</div><div class="fm"><h3>'+(V.ed?'തിരുത്തുക':'പുതിയ Model Paper')+'</h3><label for="p_sub">വിഷയം</label><select id="p_sub">'+subs.map(s=>'<option value="'+s._id+'"'+(s._id===e.sub?' selected':'')+'>ക്ലാസ് '+esc(s.cls)+' · '+esc(s.name)+'</option>').join('')+'</select><label for="p_exam">പരീക്ഷ</label><select id="p_exam">'+Object.keys(EX).map(k=>'<option value="'+k+'"'+(k===e.exam?' selected':'')+'>'+EX[k][0]+'</option>').join('')+'</select><label for="p_t">പേര് (ഉദാ. Model 1)</label><input id="p_t" value="'+esc(e.title||'')+'"><label for="p_f">PDF ഫയൽ (6 MB വരെ)</label><input id="p_f" type="file" accept="application/pdf"><label for="p_u">അല്ലെങ്കിൽ PDF Link (Google Drive മുതലായവ)</label><input id="p_u" value="'+esc(e.url||'')+'" placeholder="https://…">'+(V.ed&&(e.n||e.url)?'<p class="mu">ഇപ്പോൾ ഉള്ളത്: '+(e.n?'അപ്‌ലോഡ് ചെയ്ത PDF ('+Math.round((e.size||0)/1024)+' KB)':'Link')+'. പുതിയത് നൽകിയാൽ മാറും.</p>':'')+'<button class="cta" onclick="saveP()">'+(V.ed?'മാറ്റം സേവ് ചെയ്യുക':'ചേർക്കുക')+'</button>'+(V.ed?'<button class="cta ghost" onclick="edit(\'\')">റദ്ദാക്കുക</button>':'')+'</div></div>';
+}
+async function saveP(){
+  const sub=$('p_sub').value,exam=$('p_exam').value,title=$('p_t').value.trim(),url=$('p_u').value.trim(),f=$('p_f').files[0];
+  const old=V.ed?A('papers').find(x=>x._id===V.ed):null,s=A('subjects').find(x=>x._id===sub);
+  if(!s){toast('വിഷയം തിരഞ്ഞെടുക്കൂ');return}
+  if(!title){toast('പേര് നൽകൂ');return}
+  if(url&&!/^https?:\/\//i.test(url)){toast('Link https:// ൽ തുടങ്ങണം');return}
+  if(!f&&!url&&!(old&&(old.n||old.url))){toast('PDF തിരഞ്ഞെടുക്കൂ, അല്ലെങ്കിൽ Link നൽകൂ');return}
+  if(f&&f.size>6*1024*1024){toast('PDF 6 MB-ൽ കൂടുതലാണ്. ചെറുതാക്കൂ, അല്ലെങ്കിൽ Drive Link നൽകൂ');return}
+  const ref=old?doc(db,'papers',V.ed):doc(collection(db,'papers')),cid=i=>String(i).padStart(3,'0');
+  let n=old?(old.n||0):0,size=old?(old.size||0):0,u=old?(old.url||''):'';
+  try{
+    if(f){
+      toast('അപ്‌ലോഡ് ചെയ്യുന്നു… കാത്തിരിക്കൂ');
+      const b64=await b64of(f),CH=700000,k=Math.ceil(b64.length/CH);
+      for(let i=0;i<k;i++)await tmo(setDoc(doc(db,'papers',ref.id,'chunks',cid(i)),{d:b64.slice(i*CH,(i+1)*CH)}),40000);
+      for(let i=k;i<n;i++)await tmo(deleteDoc(doc(db,'papers',ref.id,'chunks',cid(i))));
+      n=k;size=f.size;u='';delete PB[ref.id];
+    }else if(url){
+      for(let i=0;i<n;i++)await tmo(deleteDoc(doc(db,'papers',ref.id,'chunks',cid(i))));
+      n=0;size=0;u=url;
+    }
+    await tmo(setDoc(ref,{sub,exam,title,cls:String(s.cls),url:u,n,size,ts:(old&&old.ts)||Date.now()}),12000);
+  }catch(e){console.error(e);toast(errMsg(e,'സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'));return}
+  V.ed='';render();toast('സേവ് ചെയ്തു ✓');
+}
+async function delP(id){
+  if(V.cd!==id){V.cd=id;refresh();toast('ഒഴിവാക്കാൻ ഒരിക്കൽ കൂടി അമർത്തൂ');return}
+  V.cd='';
+  try{
+    const q=await getDocs(collection(db,'papers',id,'chunks'));
+    await Promise.all(q.docs.map(d=>deleteDoc(d.ref)));
+    await deleteDoc(doc(db,'papers',id));
+  }catch(e){toast(errMsg(e,'ഒഴിവാക്കാൻ കഴിഞ്ഞില്ല.'))}
+  refresh();
+}
+
 /* ---------- shell ---------- */
 function navh(){return '<nav>'+(me?'<button class="'+(V.s!=='admin'?'on':'')+'" onclick="go(\'home\')"><span>🏠</span>Home</button>':'')+(adm?'<button class="'+(V.s==='admin'?'on':'')+'" onclick="go(\'admin\')"><span>⚙️</span>Admin</button>':'')+'<button onclick="out()"><span>🚪</span>Exit</button></nav>'}
 function render(){
-  if((V.s==='home'||V.s==='list')&&!me)V.s='login';
+  if((V.s==='home'||V.s==='list'||V.s==='mp')&&!me)V.s='login';
   if(V.s==='admin'&&!adm)V.s='login';
   const s=V.s;
-  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='admin'?admin():'<section class="scr hero green"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
-  const nav=s==='home'||s==='list'||s==='admin';
+  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='admin'?admin():'<section class="scr hero green"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
+  const nav=s==='home'||s==='list'||s==='mp'||s==='admin';
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+'">'+h+(nav?navh():'')+'<div class="toast" id="toast"></div></div>';
   car();
 }
-Object.assign(window,{go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar});
+Object.assign(window,{go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP});
 
 async function boot(){
   render();
