@@ -23,12 +23,36 @@ tt:{l:'ടൈം ടേബിൾ',f:[['day','ദിവസം'],['time','സമ�
 slides:{l:'സ്ലൈഡുകൾ',f:[['t','തലക്കെട്ട് (ഓപ്ഷണൽ)'],['url','Link (WhatsApp ഗ്രൂപ്പ് / YouTube / സൈറ്റ്)'],['cls','ക്ലാസ്']]},
 subjects:{l:'വിഷയങ്ങൾ',f:[['name','വിഷയം (English)'],['ar','അറബി പേര് (ഓപ്ഷണൽ)'],['cls','ക്ലാസ്'],['soon','Coming soon ആണോ?',['No','Yes']]]}
 };
-const T={live:['🔴','Live ക്ലാസ്'],yt:['▶️','YouTube ക്ലാസ്'],notes:['📚','നോട്സ്'],ann:['📢','അറിയിപ്പുകൾ'],tt:['🗓️','ടൈം ടേബിൾ'],att:['✅','ഹാജർ']};
-const EX={q:['QUARTERLY EXAM','Quarterly Question Paper','📋'],h:['HALF YEARLY EXAM','Half Year Question Paper','✅'],f:['FINAL EXAM','Final Question Paper','🎓']};
+const T={live:['video','Live ക്ലാസ്'],yt:['play','YouTube ക്ലാസ്'],notes:['book','നോട്സ്'],ann:['bell','അറിയിപ്പുകൾ'],tt:['cal','ടൈം ടേബിൾ'],att:['check','ഹാജർ']};
+const EX={q:['QUARTERLY EXAM','Quarterly Question Paper','clip'],h:['HALF YEARLY EXAM','Half Year Question Paper','check'],f:['FINAL EXAM','Final Question Paper','cap']};
 let MP={step:'sub',sub:'',paper:''},SUBS=null,PAP=null;const PB={};
 let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},SL=[],LV=[],LST=null,PI=null,PK='',tp=0,tmr,CI,unsub=[];
 let W={m:'c',c:'1',i:0,t:'',r:false};
 const A=k=>DA[k]||[];
+const IC={
+home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+video:'<rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/>',
+play:'<circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4z"/>',
+book:'<path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/>',
+bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+check:'<circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/>',
+file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',
+shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+out:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/>',
+back:'<path d="M19 12H5M12 19l-7-7 7-7"/>',
+right:'<path d="M9 6l6 6-6 6"/>',
+ext:'<path d="M7 17L17 7M8 7h9v9"/>',
+edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
+eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
+layers:'<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+clip:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 12h6M9 16h6"/>',
+cap:'<path d="M22 10L12 5 2 10l10 5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>'
+};
+const ico=n=>'<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(IC[n]||'')+'</svg>';
+
 
 function toast(m){const e=$('toast');if(!e)return;e.textContent=m;e.classList.add('on');clearTimeout(tmr);tmr=setTimeout(()=>e.classList.remove('on'),2400)}
 function go(s,k){V.s=s;V.k=k||'';render();window.scrollTo(0,0)}
@@ -108,14 +132,14 @@ async function out(){
 function tap(){tp++;if(tp>=5){tp=0;go(adm?'admin':'adminlogin')}}
 
 /* ---------- student screens ---------- */
-function hero(inner){return '<section class="scr hero green"><span class="fl" style="top:7%;left:10%">📖</span><span class="fl" style="top:12%;right:12%">🌙</span><span class="fl" style="bottom:8%;left:9%">✏️</span><span class="fl" style="bottom:10%;right:10%">🕌</span><div class="halo" onclick="tap()"><img src="icon-192.png" alt="Thamheed Academy logo"></div><h1>Thamheed Academy</h1>'+inner+'</section>'}
+function hero(inner){return '<section class="scr hero"><div class="logo" onclick="tap()"><img src="icon-192.png" alt="Thamheed Academy logo"></div><h1>Thamheed Academy</h1>'+inner+'</section>'}
 const splash=()=>hero('<p>എവിടെയും എപ്പോഴും പഠിക്കാം</p><button class="cta" onclick="go(\'login\')">ആരംഭിക്കാം</button>');
 const login=()=>hero('<p>Academy നൽകിയ Student ID നൽകൂ</p><input id="sid" placeholder="Student ID" autocapitalize="characters" autocomplete="off"><div class="err" id="err"></div><button class="cta" onclick="doLogin()">പ്രവേശിക്കാം</button>'+(adm?'<button class="cta ghost" onclick="go(\'admin\')">Admin panel</button>':''));
 const adminLogin=()=>hero('<p>Admin ലോഗിൻ</p><input id="ae" type="email" placeholder="Email" autocomplete="username"><input id="ap" type="password" placeholder="Password" autocomplete="current-password"><div class="err" id="err"></div><button class="cta" onclick="doAdmin()">പ്രവേശിക്കാം</button><button class="cta ghost" onclick="go(\'login\')">← തിരികെ</button>');
 function carousel(){
   if(!SL.length)return '';
   return '<div class="car"><div class="trk" id="trk" onscroll="dots(this)" ontouchstart="stopCar()">'+SL.map(x=>{
-    const u=safe(x.url),im=isimg(x.img),inner=im?'<img src="'+x.img+'" alt="'+esc(x.t)+'">':'<b>'+esc(x.t)+'</b>',cl='sl'+(im?' im':' green');
+    const u=safe(x.url),im=isimg(x.img),inner=im?'<img src="'+x.img+'" alt="'+esc(x.t)+'">':'<b>'+esc(x.t)+'</b>',cl='sl'+(im?' im':' tx');
     return u?'<a class="'+cl+'" href="'+u+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="'+cl+'">'+inner+'</div>';
   }).join('')+'</div>'+(SL.length>1?'<div class="dts" id="dts">'+SL.map((x,i)=>'<i'+(i?'':' class="on"')+'></i>').join('')+'</div>':'')+'</div>';
 }
@@ -127,31 +151,31 @@ function car(){
 }
 function home(){
   const nx=LV[0],u=nx?safe(nx.url):'';
+  const tiles=Object.keys(T).map(k=>'<button class="cc" onclick="openList(\''+k+'\')"><div class="ic">'+ico(T[k][0])+'</div><b>'+T[k][1]+'</b></button>').join('')+'<button class="cc" onclick="openMP()"><div class="ic">'+ico('file')+'</div><b>Model Paper</b></button>';
   return '<section class="scr"><div class="top"><div><small>അസ്സലാമു അലൈക്കും</small><h2>'+esc(me.name)+'</h2></div><div class="tag">ക്ലാസ് '+esc(me.cls)+'</div></div>'+carousel()
-  +'<div class="promo green">'+(nx?'<small>അടുത്ത Live ക്ലാസ്</small><b>'+esc(nx.t)+'</b><small>'+esc(nx.time)+'</small>'+(u?'<br><a class="jn" href="'+u+'" target="_blank" rel="noopener">ക്ലാസിൽ ചേരൂ</a>':''):'<b>ഇപ്പോൾ Live ക്ലാസ് ഷെഡ്യൂൾ ചെയ്തിട്ടില്ല</b>')+'</div>'
-  +'<div class="sec"><h3>നിങ്ങളുടെ പഠനം</h3></div><div class="grid">'+Object.keys(T).map(k=>'<button class="cc" onclick="openList(\''+k+'\')"><div class="ic green">'+T[k][0]+'</div><b>'+T[k][1]+'</b></button>').join('')+'<button class="cc" onclick="openMP()"><div class="ic green">📝</div><b>Model Paper</b></button></div></section>';
+  +'<div class="promo"><div class="ic sm">'+ico('video')+'</div><div class="pt2">'+(nx?'<small>അടുത്ത Live ക്ലാസ്</small><b>'+esc(nx.t)+'</b><small>'+esc(nx.time)+'</small>':'<b>ഇപ്പോൾ Live ക്ലാസ് ഷെഡ്യൂൾ ചെയ്തിട്ടില്ല</b>')+'</div>'+(u?'<a class="jn" href="'+u+'" target="_blank" rel="noopener">ചേരൂ</a>':'')+'</div>'
+  +'<div class="sec"><h3>നിങ്ങളുടെ പഠനം</h3></div><div class="grid">'+tiles+'</div></section>';
 }
 function item(k,x){
   const ti=k==='tt'?x.sub:x.t,sm=k==='live'?x.time:k==='tt'?x.day+' · '+x.time:k==='ann'?(x.d||'')+' '+(x.b||''):'',u=safe(x.url);
-  return '<div class="ol"><div class="n green">'+T[k][0]+'</div><div class="t">'+esc(ti)+'<small>'+esc(sm)+'</small></div>'+(u?'<a class="pl" href="'+u+'" target="_blank" rel="noopener" aria-label="Open">↗</a>':'')+'</div>';
+  return '<div class="ol"><div class="n">'+ico(T[k][0])+'</div><div class="t">'+esc(ti)+'<small>'+esc(sm)+'</small></div>'+(u?'<a class="pl" href="'+u+'" target="_blank" rel="noopener" aria-label="Open">'+ico('ext')+'</a>':'')+'</div>';
 }
 function list(){
-  const k=V.k;let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">←</button><span>'+T[k][1]+'</span><span style="width:44px"></span></div>';
-  if(k==='att'){const p=+me.p||0,t=+me.t||0,pc=t?Math.round(p*100/t):0;h+='<div class="ban green"><small>ഹാജർ</small><b>'+pc+'%</b><small>'+p+' / '+t+' ദിവസം</small></div><div class="pb"><i style="width:'+pc+'%"></i></div>'}
+  const k=V.k;let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T[k][1]+'</span><span style="width:44px"></span></div>';
+  if(k==='att'){const p=+me.p||0,t=+me.t||0,pc=t?Math.round(p*100/t):0;h+='<div class="ban"><small>ഹാജർ</small><b>'+pc+'%</b><small>'+p+' / '+t+' ദിവസം</small><div class="pb"><i style="width:'+pc+'%"></i></div></div>'}
   else if(LST===null)h+='<div class="empty">ലോഡ് ചെയ്യുന്നു…</div>';
   else if(!LST.length)h+='<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div>';
   else h+=LST.map(x=>item(k,x)).join('');
   return h+'</section>';
 }
-
 /* ---------- admin ---------- */
-const chips=()=>Object.keys(S).map(k=>'<button class="chip'+(k===V.sec?' green':'')+'" onclick="sec(\''+k+'\')">'+S[k].l+' ('+A(k).length+')</button>').join('')+'<button class="chip'+(V.sec==='papers'?' green':'')+'" onclick="sec(\'papers\')">📝 Model Paper ('+A('papers').length+')</button><button class="chip'+(V.sec==='wa'?' green':'')+'" onclick="sec(\'wa\')">📨 WhatsApp</button>';
+const chips=()=>Object.keys(S).map(k=>'<button class="chip'+(k===V.sec?' on':'')+'" onclick="sec(\''+k+'\')">'+S[k].l+' ('+A(k).length+')</button>').join('')+'<button class="chip'+(V.sec==='papers'?' on':'')+'" onclick="sec(\'papers\')">Model Paper ('+A('papers').length+')</button><button class="chip'+(V.sec==='wa'?' on':'')+'" onclick="sec(\'wa\')">WhatsApp</button>';
 function sec(k){V.sec=k;V.ed='';V.cd='';render()}
 function edit(id){V.ed=id;render()}
 function lst(){
   const c=S[V.sec],a=A(V.sec);
   if(!a.length)return '<div class="empty">ഒന്നുമില്ല. ചേർക്കൂ.</div>';
-  return a.map(x=>'<div class="ol">'+(isimg(x.img)?'<img class="th" alt="" src="'+x.img+'">':'')+'<div class="t">'+esc(x[c.f[0][0]]||(x.img?'(ചിത്ര സ്ലൈഡ്)':''))+'<small>'+esc(x[c.f[1][0]])+(c.f[2]?' · '+esc(x[c.f[2][0]]):'')+'</small></div><button class="pl" onclick="edit(\''+x._id+'\')" aria-label="Edit">✏️</button><button class="pl" onclick="del(\''+x._id+'\')" aria-label="Delete">'+(V.cd===x._id?'❗':'🗑️')+'</button></div>').join('');
+  return a.map(x=>'<div class="ol">'+(isimg(x.img)?'<img class="th" alt="" src="'+x.img+'">':'')+'<div class="t">'+esc(x[c.f[0][0]]||(x.img?'(ചിത്ര സ്ലൈഡ്)':''))+'<small>'+esc(x[c.f[1][0]])+(c.f[2]?' · '+esc(x[c.f[2][0]]):'')+'</small></div><button class="pl" onclick="edit(\''+x._id+'\')" aria-label="Edit">'+ico('edit')+'</button><button class="pl'+(V.cd===x._id?' dng':'')+'" onclick="del(\''+x._id+'\')" aria-label="Delete">'+ico('trash')+'</button></div>').join('');
 }
 function refresh(){const l=$('lst');if(l&&V.sec!=='wa')l.innerHTML=V.sec==='papers'?lstP():lst();const c=$('chips');if(c)c.innerHTML=chips()}
 function pick(i){
@@ -164,7 +188,7 @@ function pick(i){
 }
 function gid(){const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(8));const el=$('f_id');if(el)el.value=[...r].map(x=>a[x%32]).join('')}
 function extra(s,e){
-  if(s==='students')return '<button class="cta ghost" type="button" onclick="gid()">🔑 പുതിയ Student ID ഉണ്ടാക്കുക</button><label for="f_wa">രക്ഷിതാവിന്റെ WhatsApp നമ്പർ (Admin-ന് മാത്രം കാണാം)</label><input id="f_wa" inputmode="tel" placeholder="9XXXXXXXXX" value="'+esc(CT[e._id]||'')+'">';
+  if(s==='students')return '<button class="cta ghost" type="button" onclick="gid()">പുതിയ Student ID ഉണ്ടാക്കുക</button><label for="f_wa">രക്ഷിതാവിന്റെ WhatsApp നമ്പർ (Admin-ന് മാത്രം കാണാം)</label><input id="f_wa" inputmode="tel" placeholder="9XXXXXXXXX" value="'+esc(CT[e._id]||'')+'">';
   if(s==='slides'){const im=PI||e.img||'';return '<label for="f_img">ബാനർ ചിത്രം (ഏകദേശം 3:1, ഉദാ. 1200×400)</label><input id="f_img" type="file" accept="image/*" onchange="pick(this)"><img id="pv" class="pv" alt="" src="'+(isimg(im)?im:'')+'" style="display:'+(isimg(im)?'block':'none')+'">'}
   return '';
 }
@@ -230,7 +254,7 @@ function waCopy(){
 }
 function waPanel(){
   const st=A('students');
-  let h='<div class="fm" style="max-width:640px"><h3>📨 WhatsApp അറിയിപ്പ്</h3><label for="w_m">ആർക്ക്?</label><select id="w_m" onchange="waRead();render()"><option value="c"'+(W.m==='c'?' selected':'')+'>ക്ലാസ് അനുസരിച്ച്</option><option value="i"'+(W.m==='i'?' selected':'')+'>ഒരു വിദ്യാർത്ഥിക്ക്</option></select>';
+  let h='<div class="fm" style="max-width:640px"><h3>WhatsApp അറിയിപ്പ്</h3><label for="w_m">ആർക്ക്?</label><select id="w_m" onchange="waRead();render()"><option value="c"'+(W.m==='c'?' selected':'')+'>ക്ലാസ് അനുസരിച്ച്</option><option value="i"'+(W.m==='i'?' selected':'')+'>ഒരു വിദ്യാർത്ഥിക്ക്</option></select>';
   if(W.m==='c')h+='<label for="w_c">ക്ലാസ്</label><select id="w_c" onchange="waRead();render()">'+CL.map(x=>'<option'+(x===W.c?' selected':'')+'>'+x+'</option>').join('')+'</select>';
   else h+='<label for="w_i">വിദ്യാർത്ഥി</label><select id="w_i" onchange="waRead();render()">'+st.map((x,i)=>'<option value="'+i+'"'+(i===W.i?' selected':'')+'>'+esc(x.name)+' ('+esc(x.cls)+')</option>').join('')+'</select>';
   h+='<label for="w_t">സന്ദേശം ({name} = വിദ്യാർത്ഥിയുടെ പേര്)</label><textarea id="w_t" rows="4" oninput="waT(this.value)">'+esc(W.t)+'</textarea><button class="cta" onclick="waGo()">അയക്കാൻ തയ്യാറാക്കുക</button><button class="cta ghost" onclick="waCopy()">സന്ദേശം കോപ്പി ചെയ്യുക (ഗ്രൂപ്പിന്)</button></div>';
@@ -288,29 +312,29 @@ async function mpOpen(share){
   }
 }
 function mp(){
-  let h='<section class="scr"><div class="bar"><button onclick="mpBack()" aria-label="Back">←</button><span>Model Paper</span><span style="width:44px"></span></div>';
+  let h='<section class="scr"><div class="bar"><button onclick="mpBack()" aria-label="Back">'+ico('back')+'</button><span>Model Paper</span><span style="width:44px"></span></div>';
   if(SUBS===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
   if(MP.step==='sub'){
     if(!SUBS.length)return h+'<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div></section>';
-    return h+'<div class="grid">'+SUBS.map(s=>{const soon=s.soon==='Yes';return '<button class="cc sj" '+(soon?'disabled':'onclick="mpSub(\''+s._id+'\')"')+'><div class="ic green">📘</div>'+(s.ar?'<b class="ar" dir="auto">'+esc(s.ar)+'</b>':'')+'<b>'+esc(s.name)+'</b>'+(soon?'<div class="rb">COMING SOON</div>':'')+'</button>'}).join('')+'</div></section>';
+    return h+'<div class="grid">'+SUBS.map(s=>{const soon=s.soon==='Yes';return '<button class="cc sj" '+(soon?'disabled':'onclick="mpSub(\''+s._id+'\')"')+'><div class="ic">'+ico('layers')+'</div>'+(s.ar?'<b class="ar" dir="auto">'+esc(s.ar)+'</b>':'')+'<b>'+esc(s.name)+'</b>'+(soon?'<div class="rb">COMING SOON</div>':'')+'</button>'}).join('')+'</div></section>';
   }
   if(MP.step==='exam'){
     const sj=SUBS.find(x=>x._id===MP.sub)||{name:''},ps=PAP.filter(p=>p.sub===MP.sub);
     h+='<h2 class="mh">'+esc(sj.name)+'</h2>';
     Object.keys(EX).forEach(k=>{
       const l=ps.filter(p=>p.exam===k);
-      h+='<div class="eh"><span>'+EX[k][2]+' '+EX[k][0]+'</span><span class="bd">'+(l.length?l.length+(l.length>1?' Papers':' Paper'):(k==='f'?'Upcoming':'—'))+'</span></div>';
-      h+=l.length?l.map((p,i)=>'<button class="px c'+(i%3)+'" onclick="mpPaper(\''+p._id+'\')"><span class="pi">PDF</span><span class="pt"><b>'+esc(p.title)+'</b><small>'+EX[k][1]+'</small></span><span>›</span></button>').join(''):'<div class="cs">Coming soon</div>';
+      h+='<div class="eh"><span>'+ico(EX[k][2])+EX[k][0]+'</span><span class="bd">'+(l.length?l.length+(l.length>1?' Papers':' Paper'):(k==='f'?'Upcoming':'—'))+'</span></div>';
+      h+=l.length?l.map(p=>'<button class="px" onclick="mpPaper(\''+p._id+'\')"><span class="pi">'+ico('file')+'</span><span class="pt"><b>'+esc(p.title)+'</b><small>'+EX[k][1]+'</small></span>'+ico('right')+'</button>').join(''):'<div class="cs">Coming soon</div>';
     });
     return h+'</section>';
   }
   const p=PAP.find(x=>x._id===MP.paper)||{},sj=SUBS.find(x=>x._id===p.sub)||{name:''};
-  return h+'<div class="pd"><div class="pbig green">📄</div><h2>'+esc((sj.name?sj.name+' - ':'')+(p.title||''))+'</h2><button class="cta" onclick="mpOpen(0)">👁 Open Now</button><button class="cta ghost" onclick="mpOpen(1)">🔗 Share / Print</button></div></section>';
+  return h+'<div class="pd"><div class="pbig">'+ico('file')+'</div><h2>'+esc((sj.name?sj.name+' - ':'')+(p.title||''))+'</h2><button class="cta" onclick="mpOpen(0)">'+ico('eye')+' Open Now</button><button class="cta ghost" onclick="mpOpen(1)">'+ico('share')+' Share / Print</button></div></section>';
 }
 function lstP(){
   const ps=A('papers'),subs=A('subjects');
   if(!ps.length)return '<div class="empty">ഒന്നുമില്ല. ചേർക്കൂ.</div>';
-  return ps.map(p=>{const s=subs.find(x=>x._id===p.sub);return '<div class="ol"><div class="n green">📄</div><div class="t">'+esc(p.title)+'<small>'+esc(s?'ക്ലാസ് '+s.cls+' · '+s.name:'?')+' · '+esc((EX[p.exam]||[''])[0])+'</small></div><button class="pl" onclick="edit(\''+p._id+'\')" aria-label="Edit">✏️</button><button class="pl" onclick="delP(\''+p._id+'\')" aria-label="Delete">'+(V.cd===p._id?'❗':'🗑️')+'</button></div>'}).join('');
+  return ps.map(p=>{const s=subs.find(x=>x._id===p.sub);return '<div class="ol"><div class="n">'+ico('file')+'</div><div class="t">'+esc(p.title)+'<small>'+esc(s?'ക്ലാസ് '+s.cls+' · '+s.name:'?')+' · '+esc((EX[p.exam]||[''])[0])+'</small></div><button class="pl" onclick="edit(\''+p._id+'\')" aria-label="Edit">'+ico('edit')+'</button><button class="pl'+(V.cd===p._id?' dng':'')+'" onclick="delP(\''+p._id+'\')" aria-label="Delete">'+ico('trash')+'</button></div>'}).join('');
 }
 function paperPanel(){
   const subs=A('subjects'),e=V.ed?(A('papers').find(x=>x._id===V.ed)||{}):{};
@@ -354,12 +378,12 @@ async function delP(id){
 }
 
 /* ---------- shell ---------- */
-function navh(){return '<nav>'+(me?'<button class="'+(V.s!=='admin'?'on':'')+'" onclick="go(\'home\')"><span>🏠</span>Home</button>':'')+(adm?'<button class="'+(V.s==='admin'?'on':'')+'" onclick="go(\'admin\')"><span>⚙️</span>Admin</button>':'')+'<button onclick="out()"><span>🚪</span>Exit</button></nav>'}
+function navh(){return '<nav><div class="brand"><img src="icon-192.png" alt=""><b>Thamheed Academy</b></div>'+(me?'<button class="'+(V.s!=='admin'?'on':'')+'" onclick="go(\'home\')">'+ico('home')+'<span>Home</span></button>':'')+(adm?'<button class="'+(V.s==='admin'?'on':'')+'" onclick="go(\'admin\')">'+ico('shield')+'<span>Admin</span></button>':'')+'<button onclick="out()">'+ico('out')+'<span>Exit</span></button></nav>'}
 function render(){
   if((V.s==='home'||V.s==='list'||V.s==='mp')&&!me)V.s='login';
   if(V.s==='admin'&&!adm)V.s='login';
   const s=V.s;
-  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='admin'?admin():'<section class="scr hero green"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
+  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='admin'?admin():'<section class="scr hero"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
   const nav=s==='home'||s==='list'||s==='mp'||s==='admin';
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+'">'+h+(nav?navh():'')+'<div class="toast" id="toast"></div></div>';
   car();
