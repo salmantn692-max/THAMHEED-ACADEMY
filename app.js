@@ -17,12 +17,11 @@ const S={
 students:{l:'വിദ്യാർത്ഥികൾ',f:[['id','Student ID'],['name','പേര്'],['cls','ക്ലാസ്']]},
 live:{l:'Live ക്ലാസ്',f:[['t','തലക്കെട്ട്'],['time','സമയം'],['url','Link (https://…)'],['cls','ക്ലാസ്']]},
 yt:{l:'YouTube',f:[['t','തലക്കെട്ട്'],['url','YouTube Link'],['cls','ക്ലാസ്']]},
-notes:{l:'നോട്സ്',f:[['t','തലക്കെട്ട്'],['url','Link'],['cls','ക്ലാസ്']]},
 ann:{l:'അറിയിപ്പുകൾ',f:[['t','തലക്കെട്ട്'],['b','വിവരം'],['cls','ക്ലാസ്']]},
 slides:{l:'സ്ലൈഡുകൾ',f:[['t','തലക്കെട്ട് (ഓപ്ഷണൽ)'],['url','Link (WhatsApp ഗ്രൂപ്പ് / YouTube / സൈറ്റ്)'],['cls','ക്ലാസ്']]},
 subjects:{l:'വിഷയങ്ങൾ',f:[['name','വിഷയം (English)'],['ar','അറബി പേര് (ഓപ്ഷണൽ)'],['cls','ക്ലാസ്'],['soon','Coming soon ആണോ?',['No','Yes']]]}
 };
-const T={live:['video','Live ക്ലാസ്'],yt:['play','YouTube ക്ലാസ്'],notes:['book','നോട്സ്'],ann:['bell','അറിയിപ്പുകൾ'],tt:['cal','ടൈം ടേബിൾ'],att:['check','ഹാജർ']};
+const T={live:['video','Live ക്ലാസ്'],yt:['play','YouTube ക്ലാസ്'],notes:['book','Notes & Syllabus'],ann:['bell','അറിയിപ്പുകൾ'],tt:['cal','ടൈം ടേബിൾ'],att:['check','ഹാജർ']};
 const EX={q:['QUARTERLY EXAM','Quarterly Question Paper','clip'],h:['HALF YEARLY EXAM','Half Year Question Paper','check'],f:['FINAL EXAM','Final Question Paper','cap']};
 let MP={step:'sub',sub:'',paper:''},SUBS=null,PAP=null,TF=null;const PB={},TFU={};
 let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},SL=[],LV=[],LST=null,PI=null,PK='',tp=0,tmr,CI,unsub=[];
@@ -73,6 +72,7 @@ async function loadHome(){
 async function openList(k){
   if(k==='tt'){openTT();return}
   if(k==='att'){openAtt();return}
+  if(k==='notes'){openLib();return}
   V.s='list';V.k=k;LST=null;render();window.scrollTo(0,0);
   if(k==='att'){LST=[];render();return}
   try{LST=await tmo(fetchK(k),12000)}catch(e){LST=[];toast(errMsg(e,'ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'))}
@@ -85,6 +85,7 @@ function watch(){
     if(V.s==='admin')refresh();
   },()=>toast('ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല'))));
   unsub.push(onSnapshot(collection(db,'contacts'),s=>{CT={};s.docs.forEach(d=>CT[d.id]=d.data().phone||'')},()=>{}));
+  unsub.push(onSnapshot(collection(db,'lib'),s=>{DA.lib=s.docs.map(d=>({_id:d.id,...d.data()})).sort((a,b)=>(a.ts||0)-(b.ts||0));if(V.s==='admin')refresh()},()=>{}));
   unsub.push(onSnapshot(collection(db,'tfiles'),s=>{DA.tfiles=s.docs.map(d=>({_id:d.id,...d.data()})).sort((a,b)=>(a.ts||0)-(b.ts||0));if(V.s==='admin')refresh()},()=>{}));
   unsub.push(onSnapshot(collection(db,'papers'),s=>{DA.papers=s.docs.map(d=>({_id:d.id,...d.data()})).sort((a,b)=>(a.ts||0)-(b.ts||0));if(V.s==='admin')refresh()},()=>{}));
 }
@@ -171,7 +172,7 @@ function list(){
   return h+'</section>';
 }
 /* ---------- admin ---------- */
-const chips=()=>Object.keys(S).map(k=>'<button class="chip'+(k===V.sec?' on':'')+'" onclick="sec(\''+k+'\')">'+S[k].l+' ('+A(k).length+')</button>').join('')+'<button class="chip'+(V.sec==='att'?' on':'')+'" onclick="sec(\'att\')">ഹാജർ</button><button class="chip'+(V.sec==='ttf'?' on':'')+'" onclick="sec(\'ttf\')">Time Table ('+A('tfiles').length+')</button><button class="chip'+(V.sec==='papers'?' on':'')+'" onclick="sec(\'papers\')">Model Paper ('+A('papers').length+')</button><button class="chip'+(V.sec==='wa'?' on':'')+'" onclick="sec(\'wa\')">WhatsApp</button>';
+const chips=()=>Object.keys(S).map(k=>'<button class="chip'+(k===V.sec?' on':'')+'" onclick="sec(\''+k+'\')">'+S[k].l+' ('+A(k).length+')</button>').join('')+'<button class="chip'+(V.sec==='att'?' on':'')+'" onclick="sec(\'att\')">ഹാജർ</button><button class="chip'+(V.sec==='lib'?' on':'')+'" onclick="sec(\'lib\')">Book / Notes & Syllabus ('+A('lib').length+')</button><button class="chip'+(V.sec==='ttf'?' on':'')+'" onclick="sec(\'ttf\')">Time Table ('+A('tfiles').length+')</button><button class="chip'+(V.sec==='papers'?' on':'')+'" onclick="sec(\'papers\')">Model Paper ('+A('papers').length+')</button><button class="chip'+(V.sec==='wa'?' on':'')+'" onclick="sec(\'wa\')">WhatsApp</button>';
 function sec(k){V.sec=k;V.ed='';V.cd='';render();if(k==='att')atSel()}
 function edit(id){V.ed=id;render()}
 function lst(){
@@ -179,7 +180,7 @@ function lst(){
   if(!a.length)return '<div class="empty">ഒന്നുമില്ല. ചേർക്കൂ.</div>';
   return a.map(x=>'<div class="ol">'+(isimg(x.img)?'<img class="th" alt="" src="'+x.img+'">':'')+'<div class="t">'+esc(x[c.f[0][0]]||(x.img?'(ചിത്ര സ്ലൈഡ്)':''))+'<small>'+esc(x[c.f[1][0]])+(c.f[2]?' · '+esc(x[c.f[2][0]]):'')+'</small></div><button class="pl" onclick="edit(\''+x._id+'\')" aria-label="Edit">'+ico('edit')+'</button><button class="pl'+(V.cd===x._id?' dng':'')+'" onclick="del(\''+x._id+'\')" aria-label="Delete">'+ico('trash')+'</button></div>').join('');
 }
-function refresh(){const l=$('lst');if(l&&V.sec!=='wa')l.innerHTML=V.sec==='papers'?lstP():V.sec==='ttf'?lstT():lst();const c=$('chips');if(c)c.innerHTML=chips()}
+function refresh(){const l=$('lst');if(l&&V.sec!=='wa')l.innerHTML=V.sec==='papers'?lstP():V.sec==='ttf'?lstT():V.sec==='lib'?lstL():lst();const c=$('chips');if(c)c.innerHTML=chips()}
 function pick(i){
   const f=i.files&&i.files[0];if(!f)return;
   const r=new FileReader();
@@ -202,6 +203,7 @@ function admin(){
   if(s==='papers')return h+paperPanel()+'</section>';
   if(s==='ttf')return h+ttPanel()+'</section>';
   if(s==='att')return h+attPanel()+'</section>';
+  if(s==='lib')return h+libPanel()+'</section>';
   const c=S[s],e=V.ed?(A(s).find(x=>x._id===V.ed)||{}):{};
   h+='<div class="adm"><div id="lst">'+lst()+'</div><div class="fm"><h3>'+(V.ed?'തിരുത്തുക':'പുതിയത് ചേർക്കുക')+'</h3>'+c.f.map(f=>{
     const k=f[0],v=e[k]!=null?e[k]:'',n='<label for="f_'+k+'">'+f[1]+'</label>';
@@ -575,18 +577,128 @@ function attPanel(){
   return h+'<button class="cta" style="max-width:none;margin-top:8px" onclick="atSave()">ഹാജർ സേവ് ചെയ്യുക</button>';
 }
 
+/* ---------- Madrasa Book / Notes and Syllabus ---------- */
+const KL={book:'മദ്റസ Book / Notes',syll:'Syllabus'};
+let LB={step:'menu',kind:'',items:null,subs:[]};
+async function fileBlob(col,f){
+  const k=col+f._id;if(PB[k])return PB[k];
+  const key='/_f/'+col+'/'+f._id+'/'+(f.v||f.ts||0)+'/'+(f.n||0);
+  let b=await fcache.get(key);
+  if(!b){
+    const q=await tmo(getDocs(collection(db,col,f._id,'chunks')),30000);
+    const bin=atob(q.docs.sort((a,b)=>a.id<b.id?-1:1).map(d=>d.data().d).join('')),u=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+    b=new Blob([u],{type:f.mime||'application/pdf'});fcache.put(key,b);
+  }
+  return PB[k]=b;
+}
+async function putFile(col,id,f,oldN){
+  const isImg=/^image\//.test(f.type),cid=i=>String(i).padStart(3,'0');
+  let b64,size,mime;
+  if(isImg){const s=await shrink(f);b64=s.b64;size=s.size;mime='image/jpeg'}else{b64=await b64of(f);size=f.size;mime='application/pdf'}
+  const CH=700000,k=Math.ceil(b64.length/CH);
+  for(let i=0;i<k;i++)await tmo(setDoc(doc(db,col,id,'chunks',cid(i)),{d:b64.slice(i*CH,(i+1)*CH)}),40000);
+  for(let i=k;i<oldN;i++)await tmo(deleteDoc(doc(db,col,id,'chunks',cid(i))));
+  return {n:k,size,mime};
+}
+async function rmChunks(col,id,n){for(let i=0;i<n;i++)await tmo(deleteDoc(doc(db,col,id,'chunks',String(i).padStart(3,'0'))))}
+async function openLib(){
+  V.s='lib';LB={step:'menu',kind:'',items:null,subs:[]};render();window.scrollTo(0,0);
+  try{
+    const c=collection(db,'lib'),cl=String(me.cls);
+    const [a,b,s]=await tmo(Promise.all([getDocs(query(c,where('cls','==','All'))),getDocs(query(c,where('cls','==',cl))),getDocs(query(collection(db,'subjects'),where('cls','==',cl)))]),12000);
+    LB.items=[...a.docs,...b.docs].map(d=>({_id:d.id,...d.data()})).sort((x,y)=>(x.ts||0)-(y.ts||0));
+    LB.subs=s.docs.map(d=>({_id:d.id,...d.data()}));
+  }catch(e){LB.items=[];toast(errMsg(e,'ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'))}
+  render();
+}
+function libPick(k){LB.kind=k;LB.step='list';render();window.scrollTo(0,0)}
+function libBack(){if(LB.step==='list'){LB.step='menu';render()}else go('home');window.scrollTo(0,0)}
+function libView(){
+  let h='<section class="scr"><div class="bar"><button onclick="libBack()" aria-label="Back">'+ico('back')+'</button><span>Notes &amp; Syllabus</span><span style="width:44px"></span></div>';
+  if(LB.step==='menu')return h+'<p class="mu">ഒന്ന് തിരഞ്ഞെടുക്കൂ</p><div class="grid"><button class="cc" onclick="libPick(\'book\')"><div class="ic">'+ico('book')+'</div><b>'+KL.book+'</b></button><button class="cc" onclick="libPick(\'syll\')"><div class="ic">'+ico('clip')+'</div><b>'+KL.syll+'</b></button></div></section>';
+  if(LB.items===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+  const l=LB.items.filter(x=>x.kind===LB.kind);
+  h+='<h2 class="mh">'+KL[LB.kind]+'</h2>';
+  if(!l.length)return h+'<div class="cs" style="margin-top:16px">Coming soon</div></section>';
+  const row=x=>'<div class="ol"><div class="n">'+ico('file')+'</div><div class="t">'+esc(x.title)+'</div><button class="pl" onclick="libOpen(\''+x._id+'\',1)" aria-label="Share">'+ico('share')+'</button><button class="pl" onclick="libOpen(\''+x._id+'\',0)" aria-label="Open">'+ico('eye')+'</button></div>';
+  if(LB.kind==='book'){
+    const g={};l.forEach(x=>{(g[x.sub||'']=g[x.sub||'']||[]).push(x)});
+    Object.keys(g).forEach(k=>{const s=LB.subs.find(z=>z._id===k);h+='<div class="eh"><span>'+esc(s?s.name:'മറ്റുള്ളവ')+'</span><span class="bd">'+g[k].length+'</span></div>'+g[k].map(row).join('')});
+  }else h+='<div style="margin-top:14px">'+l.map(row).join('')+'</div>';
+  return h+'</section>';
+}
+async function libOpen(id,share){
+  const f=LB.items.find(x=>x._id===id);if(!f)return;
+  const mime=f.mime||'application/pdf',name=f.title+(/^image\//.test(mime)?'.jpg':'.pdf');
+  if(safe(f.url)){
+    if(share&&navigator.share){try{await navigator.share({title:f.title,url:f.url});return}catch(e){}}
+    window.open(f.url,'_blank','noopener');return;
+  }
+  let can=false;
+  try{can=!!(share&&navigator.canShare&&navigator.canShare({files:[new File([''],name,{type:mime})]}))}catch(e){}
+  const w=can?null:window.open('','_blank');
+  toast('ലോഡ് ചെയ്യുന്നു…');
+  try{
+    const b=await fileBlob('lib',f);
+    if(can){await navigator.share({files:[new File([b],name,{type:mime})],title:f.title});return}
+    const u=URL.createObjectURL(b);
+    if(w)w.location.href=u;else window.open(u,'_blank');
+  }catch(e){
+    if(w)w.close();
+    if(e&&e.name==='NotAllowedError')toast('ഫയൽ തയ്യാറായി. ഒരിക്കൽ കൂടി അമർത്തൂ');
+    else if(!(e&&e.name==='AbortError'))toast(errMsg(e,'തുറക്കാൻ കഴിഞ്ഞില്ല.'));
+  }
+}
+function lstL(){
+  const a=A('lib'),subs=A('subjects');
+  if(!a.length)return '<div class="empty">ഒന്നുമില്ല. ചേർക്കൂ.</div>';
+  return a.map(f=>{const s=subs.find(x=>x._id===f.sub);return '<div class="ol"><div class="n">'+ico('file')+'</div><div class="t">'+esc(f.title)+'<small>'+esc(KL[f.kind]||'')+' · ക്ലാസ് '+esc(f.cls)+(s?' · '+esc(s.name):'')+'</small></div><button class="pl" onclick="edit(\''+f._id+'\')" aria-label="Edit">'+ico('edit')+'</button><button class="pl'+(V.cd===f._id?' dng':'')+'" onclick="delL(\''+f._id+'\')" aria-label="Delete">'+ico('trash')+'</button></div>'}).join('');
+}
+function libPanel(){
+  const e=V.ed?(A('lib').find(x=>x._id===V.ed)||{}):{},subs=A('subjects');
+  return '<div class="adm"><div id="lst">'+lstL()+'</div><div class="fm"><h3>'+(V.ed?'തിരുത്തുക':'പുതിയത് ചേർക്കുക')+'</h3><label for="l_k">തരം</label><select id="l_k">'+Object.keys(KL).map(k=>'<option value="'+k+'"'+(k===e.kind?' selected':'')+'>'+KL[k]+'</option>').join('')+'</select><label for="l_c">ക്ലാസ്</label><select id="l_c">'+['All'].concat(CL).map(x=>'<option'+(String(x)===String(e.cls)?' selected':'')+'>'+x+'</option>').join('')+'</select><label for="l_s">വിഷയം (Book / Notes-ന് ഓപ്ഷണൽ)</label><select id="l_s"><option value="">— ഇല്ല —</option>'+subs.map(s=>'<option value="'+s._id+'"'+(s._id===e.sub?' selected':'')+'>ക്ലാസ് '+esc(s.cls)+' · '+esc(s.name)+'</option>').join('')+'</select><label for="l_t">തലക്കെട്ട്</label><input id="l_t" value="'+esc(e.title||'')+'"><label for="l_f">PDF അല്ലെങ്കിൽ ചിത്രം (PDF 6 MB വരെ)</label><input id="l_f" type="file" accept="application/pdf,image/*"><label for="l_u">അല്ലെങ്കിൽ Link (വലിയ Book-ന് Google Drive Link)</label><input id="l_u" value="'+esc(e.url||'')+'" placeholder="https://…">'+(V.ed&&(e.n||e.url)?'<p class="mu">ഇപ്പോൾ ഉള്ളത്: '+(e.n?'അപ്‌ലോഡ് ചെയ്ത ഫയൽ ('+Math.round((e.size||0)/1024)+' KB)':'Link')+'. പുതിയത് നൽകിയാൽ മാറും.</p>':'')+'<button class="cta" onclick="saveL()">'+(V.ed?'മാറ്റം സേവ് ചെയ്യുക':'ചേർക്കുക')+'</button>'+(V.ed?'<button class="cta ghost" onclick="edit(\'\')">റദ്ദാക്കുക</button>':'')+'</div></div>';
+}
+async function saveL(){
+  const kind=$('l_k').value,cls=$('l_c').value,sub=$('l_s').value,title=$('l_t').value.trim(),url=$('l_u').value.trim(),f=$('l_f').files[0];
+  const old=V.ed?A('lib').find(x=>x._id===V.ed):null;
+  if(!title){toast('തലക്കെട്ട് നൽകൂ');return}
+  if(url&&!/^https?:\/\//i.test(url)){toast('Link https:// ൽ തുടങ്ങണം');return}
+  if(!f&&!url&&!(old&&(old.n||old.url))){toast('ഫയൽ തിരഞ്ഞെടുക്കൂ, അല്ലെങ്കിൽ Link നൽകൂ');return}
+  if(f&&!/^image\//.test(f.type)&&f.type!=='application/pdf'){toast('PDF അല്ലെങ്കിൽ ചിത്രം മാത്രം തിരഞ്ഞെടുക്കൂ');return}
+  if(f&&f.type==='application/pdf'&&f.size>6*1024*1024){toast('PDF 6 MB-ൽ കൂടുതലാണ്. ചെറുതാക്കൂ, അല്ലെങ്കിൽ Link നൽകൂ');return}
+  const ref=old?doc(db,'lib',V.ed):doc(collection(db,'lib'));
+  let n=old?(old.n||0):0,size=old?(old.size||0):0,u=old?(old.url||''):'',mime=old?(old.mime||''):'';
+  try{
+    if(f){toast('അപ്‌ലോഡ് ചെയ്യുന്നു… കാത്തിരിക്കൂ');const r=await putFile('lib',ref.id,f,n);n=r.n;size=r.size;mime=r.mime;u='';delete PB['lib'+ref.id]}
+    else if(url){await rmChunks('lib',ref.id,n);n=0;size=0;mime='';u=url}
+    await tmo(setDoc(ref,{kind,cls,sub,title,mime,url:u,n,size,v:f?Date.now():((old&&old.v)||0),ts:(old&&old.ts)||Date.now()}),12000);
+  }catch(e){console.error(e);toast(errMsg(e,'സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല. ഫയൽ ശരിയാണോ എന്ന് നോക്കൂ.'));return}
+  V.ed='';render();toast('സേവ് ചെയ്തു ✓');
+}
+async function delL(id){
+  if(V.cd!==id){V.cd=id;refresh();toast('ഒഴിവാക്കാൻ ഒരിക്കൽ കൂടി അമർത്തൂ');return}
+  V.cd='';
+  try{
+    const q=await getDocs(collection(db,'lib',id,'chunks'));
+    await Promise.all(q.docs.map(d=>deleteDoc(d.ref)));
+    await deleteDoc(doc(db,'lib',id));
+  }catch(e){toast(errMsg(e,'ഒഴിവാക്കാൻ കഴിഞ്ഞില്ല.'))}
+  refresh();
+}
+
 /* ---------- shell ---------- */
 function navh(){return '<nav><div class="brand"><img src="icon-192.png" alt=""><b>Thamheed Academy</b></div>'+(me?'<button class="'+(V.s!=='admin'?'on':'')+'" onclick="go(\'home\')">'+ico('home')+'<span>Home</span></button>':'')+(adm?'<button class="'+(V.s==='admin'?'on':'')+'" onclick="go(\'admin\')">'+ico('shield')+'<span>Admin</span></button>':'')+'<button onclick="out()">'+ico('out')+'<span>Exit</span></button></nav>'}
 function render(){
-  if((V.s==='home'||V.s==='list'||V.s==='mp')&&!me)V.s='login';
+  if((V.s==='home'||V.s==='list'||V.s==='mp'||V.s==='lib')&&!me)V.s='login';
   if(V.s==='admin'&&!adm)V.s='login';
   const s=V.s;
-  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='admin'?admin():'<section class="scr hero"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
-  const nav=s==='home'||s==='list'||s==='mp'||s==='admin';
+  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='lib'?libView():s==='admin'?admin():'<section class="scr hero"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
+  const nav=s==='home'||s==='list'||s==='mp'||s==='lib'||s==='admin';
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+'">'+h+(nav?navh():'')+'<div class="toast" id="toast"></div></div>';
   car();
 }
-Object.assign(window,{go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave});
+Object.assign(window,{go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL});
 
 async function boot(){
   render();
