@@ -140,3 +140,23 @@ nav button.on::after{content:"";position:absolute;top:-9px;left:28%;right:28%;he
 .tfp{text-align:center;padding:10px 0 4px}
 .pbig.sm{width:84px;height:84px;margin-bottom:16px}
 .pbig.sm svg.i{width:38px;height:38px}
+
+/* Attendance */
+.mnav{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.mnav b{font-size:18px;font-weight:600}
+.ban.att{display:flex;gap:12px;padding:16px 22px;margin-bottom:16px}
+.ban.att>div{flex:1;text-align:center}
+.ban.att b{font-size:34px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px;box-shadow:var(--sh)}
+.cal i{font-style:normal;text-align:center;display:grid;place-items:center;aspect-ratio:1;border-radius:12px;font-size:14px}
+.cal .wd{aspect-ratio:auto;padding:6px 0;font-size:12px;color:var(--muted);font-weight:500}
+.dc{border:1.5px solid transparent}
+.dc.p{background:rgba(110,179,0,.18);border-color:var(--g2);font-weight:600}
+.dc.a{background:rgba(192,57,43,.14);border-color:#c0392b;font-weight:600}
+.lg{display:flex;gap:18px;margin-top:12px;font-size:13px;color:var(--muted)}
+.lg span{display:flex;align-items:center;gap:6px}
+.lg .dc{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-style:normal;font-size:12px}
+.pa{display:flex;gap:6px;flex:none}
+.pab{padding:9px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);font-size:13px;font-weight:500}
+.pab.p{background:var(--g);border-color:var(--g);color:#12200a;font-weight:600}
+.pab.a{background:#c0392b;border-color:#c0392b;color:#fff;font-weight:600}

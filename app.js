@@ -1,6 +1,6 @@
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,signInAnonymously,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import {initializeFirestore,collection,doc,getDoc,getDocs,setDoc,addDoc,updateDoc,deleteDoc,query,where,onSnapshot} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {initializeFirestore,collection,doc,getDoc,getDocs,setDoc,addDoc,updateDoc,deleteDoc,query,where,onSnapshot,writeBatch} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {firebaseConfig,ADMIN_EMAILS} from "./firebase-config.js";
 
 const fb=initializeApp(firebaseConfig),auth=getAuth(fb),db=initializeFirestore(fb,{experimentalAutoDetectLongPolling:true},'default');
@@ -14,7 +14,7 @@ const ph=n=>{let d=String(n||'').replace(/\D/g,'');if(d.length===10)d='91'+d;ret
 const isAdm=e=>ADMIN_EMAILS.map(x=>x.toLowerCase()).includes(String(e||'').toLowerCase());
 const CL=['1','2','3','4','5','6','7','8','9','10','+1','+2'];
 const S={
-students:{l:'വിദ്യാർത്ഥികൾ',f:[['id','Student ID'],['name','പേര്'],['cls','ക്ലാസ്'],['p','ഹാജർ ദിവസങ്ങൾ'],['t','ആകെ പ്രവൃത്തി ദിവസങ്ങൾ']]},
+students:{l:'വിദ്യാർത്ഥികൾ',f:[['id','Student ID'],['name','പേര്'],['cls','ക്ലാസ്']]},
 live:{l:'Live ക്ലാസ്',f:[['t','തലക്കെട്ട്'],['time','സമയം'],['url','Link (https://…)'],['cls','ക്ലാസ്']]},
 yt:{l:'YouTube',f:[['t','തലക്കെട്ട്'],['url','YouTube Link'],['cls','ക്ലാസ്']]},
 notes:{l:'നോട്സ്',f:[['t','തലക്കെട്ട്'],['url','Link'],['cls','ക്ലാസ്']]},
@@ -72,6 +72,7 @@ async function loadHome(){
 }
 async function openList(k){
   if(k==='tt'){openTT();return}
+  if(k==='att'){openAtt();return}
   V.s='list';V.k=k;LST=null;render();window.scrollTo(0,0);
   if(k==='att'){LST=[];render();return}
   try{LST=await tmo(fetchK(k),12000)}catch(e){LST=[];toast(errMsg(e,'ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'))}
@@ -162,7 +163,7 @@ function item(k,x){
   return '<div class="ol"><div class="n">'+ico(T[k][0])+'</div><div class="t">'+esc(ti)+'<small>'+esc(sm)+'</small></div>'+(u?'<a class="pl" href="'+u+'" target="_blank" rel="noopener" aria-label="Open">'+ico('ext')+'</a>':'')+'</div>';
 }
 function list(){
-  const k=V.k;if(k==='tt')return ttView();let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T[k][1]+'</span><span style="width:44px"></span></div>';
+  const k=V.k;if(k==='tt')return ttView();if(k==='att')return attView();let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T[k][1]+'</span><span style="width:44px"></span></div>';
   if(k==='att'){const p=+me.p||0,t=+me.t||0,pc=t?Math.round(p*100/t):0;h+='<div class="ban"><small>ഹാജർ</small><b>'+pc+'%</b><small>'+p+' / '+t+' ദിവസം</small><div class="pb"><i style="width:'+pc+'%"></i></div></div>'}
   else if(LST===null)h+='<div class="empty">ലോഡ് ചെയ്യുന്നു…</div>';
   else if(!LST.length)h+='<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div>';
@@ -170,8 +171,8 @@ function list(){
   return h+'</section>';
 }
 /* ---------- admin ---------- */
-const chips=()=>Object.keys(S).map(k=>'<button class="chip'+(k===V.sec?' on':'')+'" onclick="sec(\''+k+'\')">'+S[k].l+' ('+A(k).length+')</button>').join('')+'<button class="chip'+(V.sec==='papers'?' on':'')+'" onclick="sec(\'ttf\')">Time Table ('+A('tfiles').length+')</button><button class="chip'+(V.sec==='papers'?' on':'')+'" onclick="sec(\'papers\')">Model Paper ('+A('papers').length+')</button><button class="chip'+(V.sec==='wa'?' on':'')+'" onclick="sec(\'wa\')">WhatsApp</button>';
-function sec(k){V.sec=k;V.ed='';V.cd='';render()}
+const chips=()=>Object.keys(S).map(k=>'<button class="chip'+(k===V.sec?' on':'')+'" onclick="sec(\''+k+'\')">'+S[k].l+' ('+A(k).length+')</button>').join('')+'<button class="chip'+(V.sec==='att'?' on':'')+'" onclick="sec(\'att\')">ഹാജർ</button><button class="chip'+(V.sec==='ttf'?' on':'')+'" onclick="sec(\'ttf\')">Time Table ('+A('tfiles').length+')</button><button class="chip'+(V.sec==='papers'?' on':'')+'" onclick="sec(\'papers\')">Model Paper ('+A('papers').length+')</button><button class="chip'+(V.sec==='wa'?' on':'')+'" onclick="sec(\'wa\')">WhatsApp</button>';
+function sec(k){V.sec=k;V.ed='';V.cd='';render();if(k==='att')atSel()}
 function edit(id){V.ed=id;render()}
 function lst(){
   const c=S[V.sec],a=A(V.sec);
@@ -200,6 +201,7 @@ function admin(){
   if(s==='wa')return h+waPanel()+'</section>';
   if(s==='papers')return h+paperPanel()+'</section>';
   if(s==='ttf')return h+ttPanel()+'</section>';
+  if(s==='att')return h+attPanel()+'</section>';
   const c=S[s],e=V.ed?(A(s).find(x=>x._id===V.ed)||{}):{};
   h+='<div class="adm"><div id="lst">'+lst()+'</div><div class="fm"><h3>'+(V.ed?'തിരുത്തുക':'പുതിയത് ചേർക്കുക')+'</h3>'+c.f.map(f=>{
     const k=f[0],v=e[k]!=null?e[k]:'',n='<label for="f_'+k+'">'+f[1]+'</label>';
@@ -220,7 +222,7 @@ async function saveI(){
     if(s==='students'){
       const id=ck(o.id);if(!id){toast('Student ID നൽകൂ');return}
       if(A('students').some(x=>x._id===id&&x._id!==V.ed)){toast('ഈ Student ID നേരത്തേ ഉണ്ട്');return}
-      delete o.id;o.cls=String(o.cls);o.p=+o.p||0;o.t=+o.t||0;
+      delete o.id;o.cls=String(o.cls);
       await tmo(setDoc(doc(db,'students',id),{...o,ts:(old&&old.ts)||Date.now()}));
       if(V.ed&&V.ed!==id){await deleteDoc(doc(db,'students',V.ed));await deleteDoc(doc(db,'contacts',V.ed))}
       if(wa)await tmo(setDoc(doc(db,'contacts',id),{phone:ph(wa)}));else await tmo(deleteDoc(doc(db,'contacts',id)));
@@ -275,10 +277,15 @@ const b64of=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res
 const canShareFiles=()=>{try{return !!(navigator.canShare&&navigator.canShare({files:[new File([''],'a.pdf',{type:'application/pdf'})]}))}catch(e){return false}};
 async function pdfBlob(p){
   if(PB[p._id])return PB[p._id];
-  const q=await tmo(getDocs(collection(db,'papers',p._id,'chunks')),30000);
-  const bin=atob(q.docs.sort((a,b)=>a.id<b.id?-1:1).map(d=>d.data().d).join('')),u=new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-  return PB[p._id]=new Blob([u],{type:'application/pdf'});
+  const key='/_f/papers/'+p._id+'/'+(p.v||p.ts||0)+'/'+(p.n||0);
+  let b=await fcache.get(key);
+  if(!b){
+    const q=await tmo(getDocs(collection(db,'papers',p._id,'chunks')),30000);
+    const bin=atob(q.docs.sort((a,b)=>a.id<b.id?-1:1).map(d=>d.data().d).join('')),u=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+    b=new Blob([u],{type:'application/pdf'});fcache.put(key,b);
+  }
+  return PB[p._id]=b;
 }
 async function openMP(){
   V.s='mp';MP={step:'sub',sub:'',paper:''};SUBS=null;PAP=null;render();window.scrollTo(0,0);
@@ -364,7 +371,7 @@ async function saveP(){
       for(let i=0;i<n;i++)await tmo(deleteDoc(doc(db,'papers',ref.id,'chunks',cid(i))));
       n=0;size=0;u=url;
     }
-    await tmo(setDoc(ref,{sub,exam,title,cls:String(s.cls),url:u,n,size,ts:(old&&old.ts)||Date.now()}),12000);
+    await tmo(setDoc(ref,{sub,exam,title,cls:String(s.cls),url:u,n,size,v:f?Date.now():((old&&old.v)||0),ts:(old&&old.ts)||Date.now()}),12000);
   }catch(e){console.error(e);toast(errMsg(e,'സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'));return}
   V.ed='';render();toast('സേവ് ചെയ്തു ✓');
 }
@@ -382,10 +389,15 @@ async function delP(id){
 /* ---------- Time Table files ---------- */
 async function tfBlob(f){
   if(PB['t'+f._id])return PB['t'+f._id];
-  const q=await tmo(getDocs(collection(db,'tfiles',f._id,'chunks')),30000);
-  const bin=atob(q.docs.sort((a,b)=>a.id<b.id?-1:1).map(d=>d.data().d).join('')),u=new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-  return PB['t'+f._id]=new Blob([u],{type:f.mime||'application/pdf'});
+  const key='/_f/tfiles/'+f._id+'/'+(f.v||f.ts||0)+'/'+(f.n||0);
+  let b=await fcache.get(key);
+  if(!b){
+    const q=await tmo(getDocs(collection(db,'tfiles',f._id,'chunks')),30000);
+    const bin=atob(q.docs.sort((a,b)=>a.id<b.id?-1:1).map(d=>d.data().d).join('')),u=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+    b=new Blob([u],{type:f.mime||'application/pdf'});fcache.put(key,b);
+  }
+  return PB['t'+f._id]=b;
 }
 async function openTT(){
   V.s='list';V.k='tt';TF=null;render();window.scrollTo(0,0);
@@ -474,7 +486,7 @@ async function saveT(){
       for(let i=0;i<n;i++)await tmo(deleteDoc(doc(db,'tfiles',ref.id,'chunks',cid(i))));
       n=0;size=0;mime='';u=url;
     }
-    await tmo(setDoc(ref,{cls,title,mime,url:u,n,size,ts:(old&&old.ts)||Date.now()}),12000);
+    await tmo(setDoc(ref,{cls,title,mime,url:u,n,size,v:f?Date.now():((old&&old.v)||0),ts:(old&&old.ts)||Date.now()}),12000);
   }catch(e){console.error(e);toast(errMsg(e,'സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല. ചിത്രം/PDF ശരിയാണോ എന്ന് നോക്കൂ.'));return}
   V.ed='';render();toast('സേവ് ചെയ്തു ✓');
 }
@@ -489,6 +501,80 @@ async function delT(id){
   refresh();
 }
 
+/* ---------- file cache (saves Firebase reads) ---------- */
+const fcache={
+  async get(k){try{const c=await caches.open('thamheed-files'),r=await c.match(k);return r?await r.blob():null}catch(e){return null}},
+  async put(k,b){
+    try{
+      const c=await caches.open('thamheed-files'),pre=k.split('/').slice(0,4).join('/')+'/';
+      for(const r of await c.keys()){const u=new URL(r.url).pathname;if(u.startsWith(pre)&&u!==k)await c.delete(r)}
+      await c.put(k,new Response(b,{headers:{'Content-Type':b.type||'application/octet-stream'}}));
+    }catch(e){}
+  }
+};
+
+/* ---------- Attendance (day by day) ---------- */
+const MN=['ജനുവരി','ഫെബ്രുവരി','മാർച്ച്','ഏപ്രിൽ','മേയ്','ജൂൺ','ജൂലൈ','ഓഗസ്റ്റ്','സെപ്റ്റംബർ','ഒക്ടോബർ','നവംബർ','ഡിസംബർ'];
+const ym=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+const isoDay=d=>ym(d)+'-'+String(d.getDate()).padStart(2,'0');
+let ATM='',ATC={},AT={cls:'1',date:isoDay(new Date()),marks:{},busy:false};
+async function loadAtt(m){
+  if(ATC[m]===undefined){
+    try{const s=await tmo(getDoc(doc(db,'students',me.id,'att',m)),12000);ATC[m]=s.exists()?(s.data().d||{}):{}}
+    catch(e){toast(errMsg(e,'ഹാജർ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'));ATC[m]={}}
+  }
+  if(V.s==='list'&&V.k==='att')render();
+}
+async function openAtt(){V.s='list';V.k='att';ATM=ym(new Date());render();window.scrollTo(0,0);await loadAtt(ATM)}
+function atMove(n){const [y,mo]=ATM.split('-').map(Number);ATM=ym(new Date(y,mo-1+n,1));render();loadAtt(ATM)}
+function attView(){
+  let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T.att[1]+'</span><span style="width:44px"></span></div>';
+  const [y,mo]=ATM.split('-').map(Number),d=ATC[ATM],first=new Date(y,mo-1,1).getDay(),n=new Date(y,mo,0).getDate();
+  h+='<div class="mnav"><button class="pl" onclick="atMove(-1)" aria-label="Previous month">'+ico('back')+'</button><b>'+MN[mo-1]+' '+y+'</b><button class="pl" onclick="atMove(1)" aria-label="Next month">'+ico('right')+'</button></div>';
+  if(d===undefined)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+  let p=0,a=0;Object.keys(d).forEach(k=>{if(d[k]==='P')p++;else if(d[k]==='A')a++});
+  h+='<div class="ban att"><div><b>'+p+'</b><small>ഹാജർ ദിവസങ്ങൾ</small></div><div><b>'+a+'</b><small>അഭാവം</small></div></div>';
+  h+='<div class="cal">'+['ഞാ','തി','ചൊ','ബു','വ്യാ','വെ','ശ'].map(x=>'<i class="wd">'+x+'</i>').join('');
+  for(let i=0;i<first;i++)h+='<i></i>';
+  for(let i=1;i<=n;i++){const v=d[i];h+='<i class="dc'+(v==='P'?' p':v==='A'?' a':'')+'">'+i+'</i>'}
+  return h+'</div><div class="lg"><span><i class="dc p">✓</i> ഹാജർ</span><span><i class="dc a">✕</i> അഭാവം</span></div></section>';
+}
+const atStu=()=>A('students').filter(x=>String(x.cls)===String(AT.cls));
+async function atSel(){
+  const c=$('a_c'),d=$('a_d');if(c)AT.cls=c.value;if(d&&d.value)AT.date=d.value;
+  AT.marks={};AT.busy=true;render();
+  const [y,mo,day]=AT.date.split('-'),m=y+'-'+mo,dk=String(+day),st=atStu();
+  try{
+    const rs=await tmo(Promise.all(st.map(s=>getDoc(doc(db,'students',s._id,'att',m)))),20000);
+    rs.forEach((r,i)=>{AT.marks[st[i]._id]=r.exists()?((r.data().d||{})[dk]||''):''});
+  }catch(e){toast(errMsg(e,'ഹാജർ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'))}
+  AT.busy=false;if(V.s==='admin'&&V.sec==='att')render();
+}
+function atMark(id,v){AT.marks[id]=AT.marks[id]===v?'':v;render()}
+function atAll(){atStu().forEach(s=>{AT.marks[s._id]='P'});render()}
+async function atSave(){
+  const [y,mo,day]=AT.date.split('-'),m=y+'-'+mo,dk=String(+day),st=atStu().filter(s=>AT.marks[s._id]);
+  if(!st.length){toast('ആരെയും തിരഞ്ഞെടുത്തിട്ടില്ല');return}
+  try{
+    for(let i=0;i<st.length;i+=400){
+      const b=writeBatch(db);
+      st.slice(i,i+400).forEach(s=>b.set(doc(db,'students',s._id,'att',m),{m,d:{[dk]:AT.marks[s._id]}},{merge:true}));
+      await tmo(b.commit(),20000);
+    }
+  }catch(e){console.error(e);toast(errMsg(e,'ഹാജർ സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'));return}
+  toast('ഹാജർ സേവ് ചെയ്തു ✓');
+}
+function attPanel(){
+  const st=atStu(),dt=new Date(AT.date+'T00:00:00'),wd=['ഞായർ','തിങ്കൾ','ചൊവ്വ','ബുധൻ','വ്യാഴം','വെള്ളി','ശനി'][dt.getDay()]||'';
+  let h='<div class="fm" style="max-width:720px"><h3>ദിവസത്തെ ഹാജർ</h3><label for="a_c">ക്ലാസ്</label><select id="a_c" onchange="atSel()">'+CL.map(x=>'<option'+(x===AT.cls?' selected':'')+'>'+x+'</option>').join('')+'</select><label for="a_d">തീയതി ('+wd+')</label><input id="a_d" type="date" value="'+AT.date+'" onchange="atSel()"></div>';
+  if(AT.busy)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div>';
+  if(!st.length)return h+'<div class="empty">ഈ ക്ലാസിൽ വിദ്യാർത്ഥികൾ ഇല്ല.</div>';
+  const p=st.filter(s=>AT.marks[s._id]==='P').length,a=st.filter(s=>AT.marks[s._id]==='A').length;
+  h+='<div class="sec" style="margin-top:18px"><h3>'+st.length+' വിദ്യാർത്ഥികൾ · ഹാജർ '+p+' · അഭാവം '+a+'</h3></div><button class="cta ghost" style="max-width:none;margin:0 0 12px" onclick="atAll()">എല്ലാവരെയും ഹാജർ ആക്കുക</button>';
+  h+=st.map(s=>'<div class="ol"><div class="t">'+esc(s.name)+'<small>'+esc(s._id)+'</small></div><div class="pa"><button class="pab'+(AT.marks[s._id]==='P'?' p':'')+'" onclick="atMark(\''+s._id+'\',\'P\')">ഹാജർ</button><button class="pab'+(AT.marks[s._id]==='A'?' a':'')+'" onclick="atMark(\''+s._id+'\',\'A\')">അഭാവം</button></div></div>').join('');
+  return h+'<button class="cta" style="max-width:none;margin-top:8px" onclick="atSave()">ഹാജർ സേവ് ചെയ്യുക</button>';
+}
+
 /* ---------- shell ---------- */
 function navh(){return '<nav><div class="brand"><img src="icon-192.png" alt=""><b>Thamheed Academy</b></div>'+(me?'<button class="'+(V.s!=='admin'?'on':'')+'" onclick="go(\'home\')">'+ico('home')+'<span>Home</span></button>':'')+(adm?'<button class="'+(V.s==='admin'?'on':'')+'" onclick="go(\'admin\')">'+ico('shield')+'<span>Admin</span></button>':'')+'<button onclick="out()">'+ico('out')+'<span>Exit</span></button></nav>'}
 function render(){
@@ -500,7 +586,7 @@ function render(){
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+'">'+h+(nav?navh():'')+'<div class="toast" id="toast"></div></div>';
   car();
 }
-Object.assign(window,{go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen});
+Object.assign(window,{go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave});
 
 async function boot(){
   render();
