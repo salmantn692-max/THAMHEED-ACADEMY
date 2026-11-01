@@ -17,14 +17,14 @@ const S={
 students:{l:'വിദ്യാർത്ഥികൾ',f:[['id','Student ID'],['name','പേര്'],['cls','ക്ലാസ്']]},
 live:{l:'Live ക്ലാസ്',f:[['t','തലക്കെട്ട്'],['time','സമയം'],['url','Link (https://…)'],['cls','ക്ലാസ്']]},
 yt:{l:'YouTube',f:[['t','തലക്കെട്ട്'],['url','YouTube Link'],['cls','ക്ലാസ്']]},
-ann:{l:'അറിയിപ്പുകൾ',f:[['t','തലക്കെട്ട്'],['b','വിവരം'],['cls','ക്ലാസ്']]},
+ann:{l:'അറിയിപ്പുകൾ',f:[['t','തലക്കെട്ട്'],['b','വിവരം'],['cls','ക്ലാസ്'],['imp','പ്രധാനപ്പെട്ടതാണോ?',['No','Yes']]]},
 slides:{l:'സ്ലൈഡുകൾ',f:[['t','തലക്കെട്ട് (ഓപ്ഷണൽ)'],['url','Link (WhatsApp ഗ്രൂപ്പ് / YouTube / സൈറ്റ്)'],['cls','ക്ലാസ്']]},
 subjects:{l:'വിഷയങ്ങൾ',f:[['name','വിഷയം (English)'],['ar','അറബി പേര് (ഓപ്ഷണൽ)'],['cls','ക്ലാസ്'],['soon','Coming soon ആണോ?',['No','Yes']]]}
 };
 const T={live:['video','Live ക്ലാസ്'],yt:['play','YouTube ക്ലാസ്'],notes:['book','Notes & Syllabus'],ann:['bell','അറിയിപ്പുകൾ'],tt:['cal','ടൈം ടേബിൾ'],att:['check','ഹാജർ']};
 const EX={q:['QUARTERLY EXAM','Quarterly Question Paper','clip'],h:['HALF YEARLY EXAM','Half Year Question Paper','check'],f:['FINAL EXAM','Final Question Paper','cap']};
 let MP={step:'sub',sub:'',paper:''},SUBS=null,PAP=null,TF=null;const PB={},TFU={};
-let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},SL=[],LV=[],LST=null,PI=null,PK='',tp=0,tmr,CI,unsub=[];
+let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},SL=[],LV=[],AN=null,LST=null,PI=null,PK='',tp=0,tmr,CI,unsub=[];
 let W={m:'c',c:'1',i:0,t:'',r:false};
 const A=k=>DA[k]||[];
 const IC={
@@ -53,7 +53,13 @@ const ico=n=>'<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColo
 
 
 function toast(m){const e=$('toast');if(!e)return;e.textContent=m;e.classList.add('on');clearTimeout(tmr);tmr=setTimeout(()=>e.classList.remove('on'),2400)}
-function go(s,k){V.s=s;V.k=k||'';render();window.scrollTo(0,0)}
+let HT=0;
+async function refreshHome(){
+  HT=Date.now();
+  try{[SL,LV,AN]=await tmo(Promise.all([fetchK('slides'),fetchK('live'),fetchK('ann')]),12000)}catch(e){}
+  if(V.s==='home')render();
+}
+function go(s,k){V.s=s;V.k=k||'';render();window.scrollTo(0,0);if(s==='home'&&me&&AN!==null&&Date.now()-HT>60000)refreshHome()}
 
 /* ---------- data ---------- */
 async function fetchK(k){
@@ -65,8 +71,8 @@ async function loadHome(){
   V.s='home';render();
   try{
     const s=await tmo(getDoc(doc(db,'students',me.id)),12000);if(s.exists())me={id:me.id,...s.data()};
-    [SL,LV]=await tmo(Promise.all([fetchK('slides'),fetchK('live')]),12000);
-  }catch(e){toast('ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല')}
+    [SL,LV,AN]=await tmo(Promise.all([fetchK('slides'),fetchK('live'),fetchK('ann')]),12000);HT=Date.now();
+  }catch(e){if(AN===null)AN=[];toast('ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല')}
   render();
 }
 async function openList(k){
@@ -130,7 +136,7 @@ async function doAdmin(){
 async function out(){
   try{if(me&&auth.currentUser&&auth.currentUser.isAnonymous)await deleteDoc(doc(db,'sessions',auth.currentUser.uid))}catch(e){}
   try{await signOut(auth)}catch(e){}
-  unsub.forEach(f=>f());unsub=[];me=null;adm=false;DA={};CT={};SL=[];LV=[];go('login');
+  unsub.forEach(f=>f());unsub=[];me=null;adm=false;DA={};CT={};SL=[];LV=[];AN=null;go('login');
 }
 function tap(){tp++;if(tp>=5){tp=0;go(adm?'admin':'adminlogin')}}
 
@@ -152,23 +158,28 @@ function car(){
   clearInterval(CI);const t=$('trk');if(!t||t.children.length<2)return;
   CI=setInterval(()=>{const n=t.children.length,i=Math.round(t.scrollLeft/t.clientWidth);t.scrollTo({left:((i+1)%n)*t.clientWidth,behavior:'smooth'})},4000);
 }
+const nsort=(a,b)=>(b.imp==='Yes')-(a.imp==='Yes')||(b.ts||0)-(a.ts||0);
+function noticeCard(x){
+  const imp=x.imp==='Yes',nw=!imp&&x.ts&&(Date.now()-x.ts<3*864e5);
+  return '<div class="nt'+(imp?' imp':'')+'">'+(imp?'<span class="bg">പ്രധാനം</span>':nw?'<span class="bg nw">പുതിയത്</span>':'')+'<b>'+esc(x.t)+'</b>'+(x.b?'<p>'+esc(x.b)+'</p>':'')+'<small>'+esc(x.d||'')+'</small></div>';
+}
 function home(){
-  const nx=LV[0],u=nx?safe(nx.url):'';
+  const nz=(AN||[]).slice().sort(nsort).slice(0,3);
   const tiles=Object.keys(T).map(k=>'<button class="cc" onclick="openList(\''+k+'\')"><div class="ic">'+ico(T[k][0])+'</div><b>'+T[k][1]+'</b></button>').join('')+'<button class="cc" onclick="openMP()"><div class="ic">'+ico('file')+'</div><b>Model Paper</b></button>';
-  return '<section class="scr"><div class="top"><div><small>അസ്സലാമു അലൈക്കും</small><h2>'+esc(me.name)+'</h2></div><div class="tag">ക്ലാസ് '+esc(me.cls)+'</div></div>'+carousel()
-  +'<div class="promo"><div class="ic sm">'+ico('video')+'</div><div class="pt2">'+(nx?'<small>അടുത്ത Live ക്ലാസ്</small><b>'+esc(nx.t)+'</b><small>'+esc(nx.time)+'</small>':'<b>ഇപ്പോൾ Live ക്ലാസ് ഷെഡ്യൂൾ ചെയ്തിട്ടില്ല</b>')+'</div>'+(u?'<a class="jn" href="'+u+'" target="_blank" rel="noopener">ചേരൂ</a>':'')+'</div>'
-  +'<div class="sec"><h3>നിങ്ങളുടെ പഠനം</h3></div><div class="grid">'+tiles+'</div></section>';
+  return '<section class="scr"><div class="top"><div><small>അസ്സലാമു അലൈക്കും</small><h2>'+esc(me.name)+'</h2></div><div class="tag">ക്ലാസ് '+esc(me.cls)+'</div></div>'
+  +'<div class="nb"><div class="nbh"><div class="bi">'+ico('bell')+'</div><b>നോട്ടീസ് ബോർഡ്</b>'+(AN&&AN.length>3?'<button class="more" onclick="openList(\'ann\')">എല്ലാം കാണുക</button>':'')+'</div>'+(AN===null?'<div class="cs">ലോഡ് ചെയ്യുന്നു…</div>':nz.length?nz.map(noticeCard).join(''):'<div class="cs">പുതിയ അറിയിപ്പുകളൊന്നുമില്ല</div>')+'</div>'
+  +carousel()+'<div class="sec"><h3>നിങ്ങളുടെ പഠനം</h3></div><div class="grid">'+tiles+'</div></section>';
 }
 function item(k,x){
   const ti=k==='tt'?x.sub:x.t,sm=k==='live'?x.time:k==='tt'?x.day+' · '+x.time:k==='ann'?(x.d||'')+' '+(x.b||''):'',u=safe(x.url);
   return '<div class="ol"><div class="n">'+ico(T[k][0])+'</div><div class="t">'+esc(ti)+'<small>'+esc(sm)+'</small></div>'+(u?'<a class="pl" href="'+u+'" target="_blank" rel="noopener" aria-label="Open">'+ico('ext')+'</a>':'')+'</div>';
 }
 function list(){
-  const k=V.k;if(k==='tt')return ttView();if(k==='att')return attView();let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T[k][1]+'</span><span style="width:44px"></span></div>';
+  const k=V.k;if(k==='tt')return ttView();if(k==='att')return attView();if(k==='live')return liveView();let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T[k][1]+'</span><span style="width:44px"></span></div>';
   if(k==='att'){const p=+me.p||0,t=+me.t||0,pc=t?Math.round(p*100/t):0;h+='<div class="ban"><small>ഹാജർ</small><b>'+pc+'%</b><small>'+p+' / '+t+' ദിവസം</small><div class="pb"><i style="width:'+pc+'%"></i></div></div>'}
   else if(LST===null)h+='<div class="empty">ലോഡ് ചെയ്യുന്നു…</div>';
   else if(!LST.length)h+='<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div>';
-  else h+=LST.map(x=>item(k,x)).join('');
+  else h+=(k==='ann'?LST.slice().sort(nsort).map(noticeCard):LST.map(x=>item(k,x))).join('');
   return h+'</section>';
 }
 /* ---------- admin ---------- */
@@ -210,7 +221,7 @@ function admin(){
     if(k==='cls'){const o=(s==='students'||s==='subjects')?CL:['All'].concat(CL);return n+'<select id="f_cls">'+o.map(x=>'<option'+(String(x)===String(v)?' selected':'')+'>'+x+'</option>').join('')+'</select>'}
     if(f[2])return n+'<select id="f_'+k+'">'+f[2].map(x=>'<option'+(String(x)===String(v)?' selected':'')+'>'+x+'</option>').join('')+'</select>';
     if(k==='b')return n+'<textarea id="f_b" rows="3">'+esc(v)+'</textarea>';
-    return n+'<input id="f_'+k+'" value="'+esc(v)+'"'+((k==='p'||k==='t')?' inputmode="numeric"':'')+'>';
+    return n+'<input id="f_'+k+'" value="'+esc(v)+'">';
   }).join('')+extra(s,e)+'<button class="cta" onclick="saveI()">'+(V.ed?'മാറ്റം സേവ് ചെയ്യുക':'ചേർക്കുക')+'</button>'+(V.ed?'<button class="cta ghost" onclick="edit(\'\')">റദ്ദാക്കുക</button>':'')+'</div></div></section>';
   return h;
 }
@@ -685,6 +696,17 @@ async function delL(id){
     await deleteDoc(doc(db,'lib',id));
   }catch(e){toast(errMsg(e,'ഒഴിവാക്കാൻ കഴിഞ്ഞില്ല.'))}
   refresh();
+}
+
+function liveView(){
+  let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T.live[1]+'</span><span style="width:44px"></span></div>';
+  if(LST===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+  if(!LST.length)return h+'<div class="lempty"><div class="ic">'+ico('video')+'</div><h2>ഇപ്പോൾ Live ക്ലാസ് ഷെഡ്യൂൾ ചെയ്തിട്ടില്ല</h2><p class="mu">പുതിയ ക്ലാസ് വരുമ്പോൾ ഇവിടെ കാണാം.</p></div></section>';
+  const f=LST[0],rest=LST.slice(1);
+  const join=x=>safe(x.url)?'<a class="cta" href="'+safe(x.url)+'" target="_blank" rel="noopener">'+ico('video')+' ക്ലാസിൽ ചേരൂ</a>':'<div class="mu" style="text-align:center;margin:0">ലിങ്ക് ഉടൻ ലഭിക്കും</div>';
+  h+='<div class="lv"><span class="lt"><i></i>LIVE ക്ലാസ്</span><h2>'+esc(f.t)+'</h2><div class="tm">'+ico('cal')+'<span>'+esc(f.time)+'</span></div>'+join(f)+'</div>';
+  if(rest.length)h+='<div class="sec"><h3>മറ്റ് ക്ലാസുകൾ</h3></div>'+rest.map(x=>'<div class="lc"><div class="r"><div class="ic sm">'+ico('video')+'</div><div class="pt2"><b>'+esc(x.t)+'</b><small>'+esc(x.time)+'</small></div></div>'+join(x)+'</div>').join('');
+  return h+'</section>';
 }
 
 /* ---------- shell ---------- */
