@@ -28,6 +28,7 @@ let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},S
 let W={m:'c',c:'1',i:0,t:'',r:false};
 const A=k=>DA[k]||[];
 const IC={
+dl:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
 home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
 video:'<rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/>',
 play:'<circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4z"/>',
@@ -151,8 +152,22 @@ function tap(){tp++;if(tp>=5){tp=0;go(adm?'admin':'adminlogin')}}
 
 /* ---------- student screens ---------- */
 function hero(inner){return '<section class="scr hero"><div class="logo" onclick="tap()"><img src="icon-192.png" alt="Thamheed Academy logo"></div><h1>Thamheed Academy</h1>'+inner+'</section>'}
+let DIP=null,HELP=false;
+const isStandalone=()=>{try{return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}catch(e){return false}};
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DIP=e;if(V.s==='login'||V.s==='splash')render()});
+window.addEventListener('appinstalled',()=>{DIP=null;HELP=false;toast('ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്തു ✓');if(V.s==='login'||V.s==='splash')render()});
+async function doInstall(){
+  if(DIP){
+    try{DIP.prompt();const r=await DIP.userChoice;if(r&&r.outcome==='accepted')toast('ഇൻസ്റ്റാൾ ചെയ്യുന്നു…')}catch(e){}
+    DIP=null;render();return;
+  }
+  HELP=true;render();
+}
+function helpClose(){HELP=false;render()}
+const instBtn=()=>isStandalone()?'':'<button class="cta ghost" onclick="doInstall()">'+ico('dl')+' ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യൂ</button>';
+const instHelp=()=>HELP?'<div class="inst"><b>ഇൻസ്റ്റാൾ ചെയ്യേണ്ട വിധം</b><p><u>Android (Chrome):</u> മുകളിലെ മൂന്ന് കുത്തുകൾ (⋮) അമർത്തി "Install app" അല്ലെങ്കിൽ "Add to Home screen" തിരഞ്ഞെടുക്കുക.</p><p><u>iPhone (Safari):</u> Share ചിഹ്നം അമർത്തി "Add to Home Screen" തിരഞ്ഞെടുക്കുക.</p><p>WhatsApp-ൽ നിന്ന് ലിങ്ക് തുറന്നാൽ ⋮ അമർത്തി "Open in Chrome" തിരഞ്ഞെടുത്ത ശേഷം മാത്രം ഇൻസ്റ്റാൾ ചെയ്യുക.</p><button class="more" onclick="helpClose()">അടയ്ക്കുക</button></div>':'';
 const splash=()=>hero('<p>എവിടെയും എപ്പോഴും പഠിക്കാം</p><button class="cta" onclick="go(\'login\')">ആരംഭിക്കാം</button>');
-const login=()=>hero('<p>Academy നൽകിയ Student ID നൽകൂ</p><input id="sid" placeholder="Student ID" autocapitalize="characters" autocomplete="off"><div class="err" id="err"></div><button class="cta" onclick="doLogin()">പ്രവേശിക്കാം</button>'+(adm?'<button class="cta ghost" onclick="go(\'admin\')">Admin panel</button>':''));
+const login=()=>hero('<p>Academy നൽകിയ Student ID നൽകൂ</p><input id="sid" placeholder="Student ID" autocapitalize="characters" autocomplete="off"><div class="err" id="err"></div><button class="cta" onclick="doLogin()">പ്രവേശിക്കാം</button>'+instHelp()+instBtn()+(adm?'<button class="cta ghost" onclick="go(\'admin\')">Admin panel</button>':''));
 const adminLogin=()=>hero('<p>Admin ലോഗിൻ</p><input id="ae" type="email" placeholder="Email" autocomplete="username"><input id="ap" type="password" placeholder="Password" autocomplete="current-password"><div class="err" id="err"></div><button class="cta" onclick="doAdmin()">പ്രവേശിക്കാം</button><button class="cta ghost" onclick="go(\'login\')">← തിരികെ</button>');
 function carousel(){
   if(!SL.length)return '';
@@ -1002,7 +1017,7 @@ function render(){
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
   car();
 }
-Object.assign(window,{go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
+Object.assign(window,{doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
 
 async function boot(){
   render();

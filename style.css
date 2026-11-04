@@ -248,3 +248,9 @@ svg.star.on{color:#f2b705;fill:#f2b705}
 .fm .cb{display:inline-flex;align-items:center;gap:6px;margin:4px 14px 4px 0;font-size:15px;color:var(--text)}
 .fm input[type=checkbox]{width:20px;height:20px;padding:0;accent-color:#6eb300}
 @media (min-width:900px){.mp{left:calc(50% + 125px);bottom:20px}}
+
+/* Install help */
+.inst{width:100%;max-width:320px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:left;margin:0 0 12px;font-size:14px;line-height:1.5}
+.inst b{font-size:15px;font-weight:600}
+.hero .inst p{margin:8px 0;font-size:14px;color:var(--text)}
+.inst .more{color:var(--ico);font-weight:600;padding:6px 0;font-size:14px}
