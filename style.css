@@ -192,3 +192,59 @@ a.cta{text-decoration:none}
 .lempty .ic{width:96px;height:96px;margin-bottom:20px}
 .lempty .ic svg.i{width:42px;height:42px}
 .lempty h2{margin:0 0 8px;font-size:20px;font-weight:600}
+
+/* Quiz */
+.pts{display:flex;align-items:center;gap:4px;font-weight:600;background:var(--soft);padding:8px 12px;border-radius:12px;font-size:14px}
+.pts svg.i{width:16px;height:16px;color:#f2b705;fill:#f2b705}
+.mst{display:flex;gap:2px}
+.mst svg.i{width:18px;height:18px}
+svg.star{color:var(--line)}
+svg.star.on{color:#f2b705;fill:#f2b705}
+.qp{height:8px;background:var(--soft);border-radius:8px;overflow:hidden;margin-bottom:10px}
+.qp i{display:block;height:100%;background:var(--g);border-radius:8px;transition:width .3s}
+.qmeta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;font-weight:500;margin-bottom:12px}
+.stk{display:flex;align-items:center;gap:4px;color:#d9730d;font-weight:600}
+.stk svg.i{width:16px;height:16px}
+.qc{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px 18px;margin-bottom:16px;box-shadow:var(--sh)}
+.qc h2{margin:0;font-size:21px;line-height:1.5;font-weight:600;overflow-wrap:anywhere}
+.qo{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px;font-size:16px;color:var(--text)}
+.qo:disabled{cursor:default}
+.qo .lt2{width:34px;height:34px;border-radius:10px;background:var(--soft);display:grid;place-items:center;font-weight:600;flex:none}
+.qo.ok{background:rgba(110,179,0,.16);border-color:var(--g2)}
+.qo.ok .lt2{background:var(--g2);color:#fff}
+.qo.bad{background:rgba(192,57,43,.13);border-color:#c0392b}
+.qo.bad .lt2{background:#c0392b;color:#fff}
+.qo.dim{opacity:.5}
+.qf{border-radius:16px;padding:12px 16px;margin:4px 0 14px}
+.qf.ok{background:rgba(110,179,0,.14)}
+.qf.bad{background:rgba(192,57,43,.12)}
+.qf b{display:block}
+.qf p{margin:6px 0 0;font-size:14px}
+.qr{text-align:center;padding:10px 0}
+.stars{display:flex;justify-content:center;gap:8px;margin-bottom:10px}
+.stars svg.i{width:54px;height:54px}
+.qr h2{margin:6px 0;font-size:36px}
+
+/* Quran */
+.sr{position:relative;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px 10px 18px;text-align:center;box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;gap:2px}
+.sr .no{position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--ico)}
+.sr .sw{font-family:"Amiri","Noto Naskh Arabic",serif;font-size:15px;color:var(--muted)}
+.sr .an{font-family:"Amiri","Noto Naskh Arabic",serif;font-size:32px;line-height:1.6;font-weight:700;color:var(--text)}
+.sr small{color:var(--muted);font-size:12px}
+.sr.on{border-color:var(--g2);box-shadow:0 0 0 2px rgba(110,179,0,.35)}
+.an2{font-family:"Amiri","Noto Naskh Arabic",serif;font-size:22px;font-weight:700;display:block;line-height:1.5}
+.mp{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(66px + env(safe-area-inset-bottom,0px));width:min(416px,calc(100% - 24px));background:var(--card);border:1px solid var(--line);border-radius:18px;padding:8px 12px;display:grid;grid-template-columns:1fr auto auto auto;grid-template-areas:"i b1 p b2" "r r r t";align-items:center;gap:4px 8px;box-shadow:0 8px 24px rgba(38,42,84,.2);z-index:4}
+.mpi{grid-area:i;min-width:0}
+.mpi small{color:var(--muted);font-size:12px}
+.mp #qpb{grid-area:p}
+.mp button:nth-of-type(2){grid-area:b1}
+.mp button:nth-of-type(3){grid-area:b2}
+#qpr{grid-area:r;width:100%;accent-color:#6eb300}
+.tm2{grid-area:t;font-size:12px;color:var(--muted);white-space:nowrap}
+.pp{width:44px;height:44px;border-radius:50%;background:var(--g);color:#12200a;display:grid;place-items:center}
+.pp.sm{width:36px;height:36px;background:var(--soft);color:var(--text)}
+.pp svg.i{width:20px;height:20px}
+.cbs{display:flex;flex-wrap:wrap;margin:8px 0 4px}
+.fm .cb{display:inline-flex;align-items:center;gap:6px;margin:4px 14px 4px 0;font-size:15px;color:var(--text)}
+.fm input[type=checkbox]{width:20px;height:20px;padding:0;accent-color:#6eb300}
+@media (min-width:900px){.mp{left:calc(50% + 125px);bottom:20px}}
