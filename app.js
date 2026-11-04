@@ -28,6 +28,9 @@ let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},S
 let W={m:'c',c:'1',i:0,t:'',r:false};
 const A=k=>DA[k]||[];
 const IC={
+tick:'<path d="M5 13l4 4L19 7"/>',
+sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+dots:'<circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/>',
 close:'<path d="M18 6L6 18M6 6l12 12"/>',
 dl:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
 home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
@@ -190,7 +193,7 @@ function noticeCard(x){
 }
 function home(){
   const nz=(AN||[]).slice().sort(nsort).slice(0,3);
-  const tiles=Object.keys(T).map(k=>'<button class="cc" onclick="openList(\''+k+'\')"><div class="ic">'+ico(T[k][0])+'</div><b>'+T[k][1]+'</b></button>').join('')+'<button class="cc" onclick="openMP()"><div class="ic">'+ico('file')+'</div><b>Model Paper</b></button><button class="cc" onclick="openQuiz()"><div class="ic">'+ico('zap')+'</div><b>ക്വിസ്</b></button>'+(QCL.includes(String(me.cls))?'<button class="cc" onclick="openQuran()"><div class="ic">'+ico('moon')+'</div><b>ഖുർആൻ</b></button>':'');
+  const tiles=Object.keys(T).map(k=>'<button class="cc" onclick="openList(\''+k+'\')"><div class="ic">'+ico(T[k][0])+'</div><b>'+T[k][1]+'</b></button>').join('')+'<button class="cc" onclick="openMP()"><div class="ic">'+ico('file')+'</div><b>Model Paper</b></button><button class="cc" onclick="openQuiz()"><div class="ic">'+ico('zap')+'</div><b>ക്വിസ്</b></button>'+(QCL.includes(String(me.cls))?'<button class="cc" onclick="openQuran()"><div class="ic">'+ico('moon')+'</div><b>ഖുർആൻ</b></button>':'')+'<button class="cc" onclick="go(\'set\')"><div class="ic">'+ico('sliders')+'</div><b>സെറ്റിംഗ്സ്</b></button>';
   return '<section class="scr"><div class="top"><div><small>അസ്സലാമു അലൈക്കും</small><h2>'+esc(me.name)+'</h2></div><div class="tag">ക്ലാസ് '+esc(me.cls)+'</div></div>'
   +(nz.length?'<div class="nb"><div class="nbh"><div class="bi">'+ico('bell')+'</div><b>നോട്ടീസ് ബോർഡ്</b>'+(AN&&AN.length>3?'<button class="more" onclick="openList(\'ann\')">എല്ലാം കാണുക</button>':'')+'</div>'+nz.map(noticeCard).join('')+'</div>':'')
   +carousel()+'<div class="sec"><h3>നിങ്ങളുടെ പഠനം</h3></div><div class="grid">'+tiles+'</div></section>';
@@ -208,8 +211,9 @@ function list(){
   return h+'</section>';
 }
 /* ---------- admin ---------- */
-const chips=()=>Object.keys(S).map(k=>'<button class="chip'+(k===V.sec?' on':'')+'" onclick="sec(\''+k+'\')">'+S[k].l+' ('+A(k).length+')</button>').join('')+'<button class="chip'+(V.sec==='att'?' on':'')+'" onclick="sec(\'att\')">ഹാജർ</button><button class="chip'+(V.sec==='quiz'?' on':'')+'" onclick="sec(\'quiz\')">ക്വിസ്</button><button class="chip'+(V.sec==='quran'?' on':'')+'" onclick="sec(\'quran\')">ഖുർആൻ</button><button class="chip'+(V.sec==='lib'?' on':'')+'" onclick="sec(\'lib\')">Book / Notes & Syllabus ('+A('lib').length+')</button><button class="chip'+(V.sec==='ttf'?' on':'')+'" onclick="sec(\'ttf\')">Time Table ('+A('tfiles').length+')</button><button class="chip'+(V.sec==='papers'?' on':'')+'" onclick="sec(\'papers\')">Model Paper ('+A('papers').length+')</button><button class="chip'+(V.sec==='wa'?' on':'')+'" onclick="sec(\'wa\')">WhatsApp</button>';
-function sec(k){V.sec=k;V.ed='';V.cd='';render();if(k==='att')atSel()}
+const SECS=()=>Object.keys(S).map(k=>[k,S[k].l,A(k).length]).concat([['att','ഹാജർ'],['quiz','ക്വിസ്'],['quran','ഖുർആൻ'],['lib','Book / Notes & Syllabus',A('lib').length],['ttf','Time Table',A('tfiles').length],['papers','Model Paper',A('papers').length],['wa','WhatsApp']]);
+const chips=()=>SECS().map(x=>'<button class="mi'+(x[0]===V.sec?' on':'')+'" onclick="sec(\''+x[0]+'\')"><span>'+x[1]+'</span>'+(x[2]!=null?'<small>'+x[2]+'</small>':'')+'</button>').join('');
+function sec(k){V.sec=k;V.ed='';V.cd='';AM=false;render();if(k==='att')atSel()}
 function edit(id){V.ed=id;render()}
 function lst(){
   const c=S[V.sec],a=A(V.sec);
@@ -234,7 +238,7 @@ function extra(s,e){
 function admin(){
   if(PK!==V.sec+':'+V.ed){PK=V.sec+':'+V.ed;PI=null}
   const s=V.sec;
-  let h='<section class="scr"><h2 style="margin:0 0 4px">Admin Panel</h2><p class="mu">മാറ്റങ്ങൾ ഉടൻ തന്നെ വിദ്യാർത്ഥികൾക്ക് ലഭിക്കും.</p><div class="chips" id="chips">'+chips()+'</div>';
+  let h='<section class="scr"><div class="ah"><div><small>Admin Panel</small><h2>'+esc((SECS().find(x=>x[0]===V.sec)||['','Admin'])[1])+'</h2></div><button class="pl" onclick="amToggle()" aria-label="Menu">'+ico('dots')+'</button></div>'+(AM?'<div class="ovl" onclick="amToggle()"><div class="sheet" onclick="event.stopPropagation()"><div class="sh1">വിഭാഗം തിരഞ്ഞെടുക്കൂ</div><div id="chips">'+chips()+'</div></div></div>':'');
   if(s==='wa')return h+waPanel()+'</section>';
   if(s==='papers')return h+paperPanel()+'</section>';
   if(s==='ttf')return h+ttPanel()+'</section>';
@@ -1007,19 +1011,69 @@ async function delSu(id){
   refresh();
 }
 
+/* ---------- Settings (font, size, theme) ---------- */
+const FONTS=[
+ ['def','ഡിഫോൾട്ട് (Outfit)','','"Outfit","Noto Sans Malayalam",system-ui,sans-serif'],
+ ['manjari','Manjari (മഞ്ജരി)','Manjari:wght@400;700','"Manjari","Noto Sans Malayalam",sans-serif'],
+ ['notos','Noto Sans Malayalam','','"Noto Sans Malayalam","Outfit",sans-serif'],
+ ['notoserif','Noto Serif Malayalam','Noto+Serif+Malayalam:wght@400;700','"Noto Serif Malayalam","Noto Sans Malayalam",serif'],
+ ['anek','Anek Malayalam','Anek+Malayalam:wght@400;700','"Anek Malayalam","Noto Sans Malayalam",sans-serif'],
+ ['baloo','Baloo Chettan 2','Baloo+Chettan+2:wght@400;700','"Baloo Chettan 2","Noto Sans Malayalam",sans-serif'],
+ ['gayathri','Gayathri (ഗായത്രി)','Gayathri:wght@400;700','"Gayathri","Noto Sans Malayalam",sans-serif'],
+ ['chilanka','Chilanka (ചിലങ്ക)','Chilanka','"Chilanka","Noto Sans Malayalam",cursive']
+];
+const FSZ=[['s','ചെറുത്'],['n','സാധാരണം'],['l','വലുത്'],['xl','വളരെ വലുത്']];
+const THM=[['auto','ഓട്ടോ'],['light','ലൈറ്റ്'],['dark','ഡാർക്ക്']];
+let ST={font:'def',fs:'n',th:'auto'},AM=false;
+try{ST={...ST,...JSON.parse(localStorage.getItem('ta_set')||'{}')}}catch(e){}
+const fontOn={};
+function loadFont(id){
+  const f=FONTS.find(x=>x[0]===id);
+  if(!f||!f[2]||fontOn[id])return;
+  fontOn[id]=1;
+  const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+f[2]+'&display=swap';
+  document.head.appendChild(l);
+}
+function applySet(){
+  const f=FONTS.find(x=>x[0]===ST.font)||FONTS[0],r=document.documentElement;
+  loadFont(f[0]);
+  r.style.setProperty('--ff',f[3]);
+  r.setAttribute('data-fs',ST.fs);
+  if(ST.th==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',ST.th);
+}
+function setOpt(k,v){ST[k]=v;try{localStorage.setItem('ta_set',JSON.stringify(ST))}catch(e){}applySet();render()}
+async function clearFiles(){
+  try{await caches.delete('thamheed-files')}catch(e){}
+  Object.keys(PB).forEach(k=>delete PB[k]);
+  toast('ഡൗൺലോഡ് ചെയ്ത ഫയലുകൾ ഒഴിവാക്കി ✓');
+}
+function amToggle(){AM=!AM;render()}
+function setView(){
+  FONTS.forEach(f=>loadFont(f[0]));
+  let h='<section class="scr"><div class="bar"><button onclick="go(\''+(me?'home':'admin')+'\')" aria-label="Back">'+ico('back')+'</button><span>സെറ്റിംഗ്സ്</span><span style="width:44px"></span></div>';
+  h+='<div class="stc"><h3>ഫോണ്ട് (അക്ഷര ശൈലി)</h3>'+FONTS.map(f=>'<button class="fo'+(ST.font===f[0]?' on':'')+'" onclick="setOpt(\'font\',\''+f[0]+'\')"><span class="fs" style="font-family:'+f[3].replace(/"/g,"'")+'">അസ്സലാമു അലൈക്കും · Thamheed</span><small>'+f[1]+'</small>'+(ST.font===f[0]?ico('tick'):'')+'</button>').join('')+'</div>';
+  h+='<div class="stc"><h3>അക്ഷര വലുപ്പം</h3><div class="seg">'+FSZ.map(f=>'<button class="'+(ST.fs===f[0]?'on':'')+'" onclick="setOpt(\'fs\',\''+f[0]+'\')">'+f[1]+'</button>').join('')+'</div></div>';
+  h+='<div class="stc"><h3>തീം</h3><div class="seg">'+THM.map(f=>'<button class="'+(ST.th===f[0]?'on':'')+'" onclick="setOpt(\'th\',\''+f[0]+'\')">'+f[1]+'</button>').join('')+'</div></div>';
+  h+='<div class="stc"><h3>സ്റ്റോറേജ്</h3><p class="stn">തുറന്ന PDF, ഓഡിയോ ഫയലുകൾ ഫോണിൽ സൂക്ഷിക്കും. സ്ഥലം വേണമെങ്കിൽ ഒഴിവാക്കാം.</p><button class="cta ghost" style="max-width:none;margin:0" onclick="clearFiles()">ഡൗൺലോഡ് ചെയ്ത ഫയലുകൾ ഒഴിവാക്കുക</button></div>';
+  h+='<div class="stc"><h3>ആപ്പ്</h3>'+instHelp()+(instBtn()||'<p class="stn" style="margin:0">ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ട് ✓</p>')+'</div>';
+  return h+'</section>';
+}
+applySet();
+
 /* ---------- shell ---------- */
 
-function navh(){return '<nav><div class="brand"><img src="icon-192.png" alt=""><b>Thamheed Academy</b></div>'+(me?'<button class="'+(V.s!=='admin'?'on':'')+'" onclick="go(\'home\')">'+ico('home')+'<span>Home</span></button>':'')+(adm?'<button class="'+(V.s==='admin'?'on':'')+'" onclick="go(\'admin\')">'+ico('shield')+'<span>Admin</span></button>':'')+'<button onclick="out()">'+ico('out')+'<span>Exit</span></button></nav>'}
+function navh(){return '<nav><div class="brand"><img src="icon-192.png" alt=""><b>Thamheed Academy</b></div>'+(me?'<button class="'+(V.s!=='admin'&&V.s!=='set'?'on':'')+'" onclick="go(\'home\')">'+ico('home')+'<span>Home</span></button>':'')+'<button class="'+(V.s==='set'?'on':'')+'" onclick="go(\'set\')">'+ico('sliders')+'<span>Settings</span></button>'+(adm?'<button class="'+(V.s==='admin'?'on':'')+'" onclick="go(\'admin\')">'+ico('shield')+'<span>Admin</span></button>':'')+'<button onclick="out()">'+ico('out')+'<span>Exit</span></button></nav>'}
 function render(){
   if((V.s==='home'||V.s==='list'||V.s==='mp'||V.s==='lib'||V.s==='quiz'||V.s==='quran')&&!me)V.s='login';
   if(V.s==='admin'&&!adm)V.s='login';
+  if(V.s==='set'&&!me&&!adm)V.s='login';
   const s=V.s;
-  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='lib'?libView():s==='quiz'?quizView():s==='quran'?quranView():s==='admin'?admin():'<section class="scr hero"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
-  const nav=s==='home'||s==='list'||s==='mp'||s==='lib'||s==='quiz'||s==='quran'||s==='admin';
+  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='lib'?libView():s==='quiz'?quizView():s==='quran'?quranView():s==='set'?setView():s==='admin'?admin():'<section class="scr hero"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
+  const nav=s==='home'||s==='list'||s==='mp'||s==='lib'||s==='quiz'||s==='quran'||s==='set'||s==='admin';
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
   car();
 }
-Object.assign(window,{qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
+Object.assign(window,{setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
 
 async function boot(){
   render();

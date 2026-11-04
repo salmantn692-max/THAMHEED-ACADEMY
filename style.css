@@ -2,7 +2,7 @@
 @media (prefers-color-scheme:dark){:root{--nb:#3a2f10;--nbl:#8a6d1a;--nbt:#ffe8a3;--ib:#3d1a1a;--ibl:#b84a42;--ibt:#ffd9d6;--bg:#10121c;--card:#1a1d2c;--text:#eceefb;--muted:#9a9eb8;--line:#2a2e45;--ico:#8d87b6;--soft:#232740;--sh:none}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--text);font-family:"Outfit","Noto Sans Malayalam",system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--text);font-family:var(--ff,"Outfit","Noto Sans Malayalam",system-ui,sans-serif);padding-top:env(safe-area-inset-top,0px)}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid rgba(98,93,128,.45);outline-offset:2px}
 svg.i{width:22px;height:22px;flex:none}
@@ -255,3 +255,35 @@ svg.star.on{color:#f2b705;fill:#f2b705}
 .inst b{font-size:15px;font-weight:600}
 .hero .inst p{margin:8px 0;font-size:14px;color:var(--text)}
 .inst .more{color:var(--ico);font-weight:600;padding:6px 0;font-size:14px}
+
+/* Manual theme and text size */
+:root[data-theme="light"]{--bg:#f4f5f9;--card:#fff;--text:#262a54;--muted:#6b7090;--line:#e6e8ef;--ico:#625d80;--soft:#eef0f6;--g:#8fd100;--g2:#6eb300;--sh:0 2px 12px rgba(38,42,84,.06);--nb:#fff4d6;--nbl:#f2c94c;--nbt:#3a2e00;--ib:#ffe7e4;--ibl:#e0574d;--ibt:#5c1510}
+:root[data-theme="dark"]{--nb:#3a2f10;--nbl:#8a6d1a;--nbt:#ffe8a3;--ib:#3d1a1a;--ibl:#b84a42;--ibt:#ffd9d6;--bg:#10121c;--card:#1a1d2c;--text:#eceefb;--muted:#9a9eb8;--line:#2a2e45;--ico:#8d87b6;--soft:#232740;--sh:none}
+html[data-fs="s"] #app{zoom:.92}
+html[data-fs="l"] #app{zoom:1.12}
+html[data-fs="xl"] #app{zoom:1.25}
+
+/* Admin vertical menu */
+.ah{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.ah small{color:var(--muted)}
+.ah h2{margin:2px 0 0;font-size:22px;font-weight:600}
+.ovl{position:fixed;inset:0;background:rgba(16,18,28,.5);z-index:20;display:flex;justify-content:flex-end;align-items:flex-start;padding:calc(env(safe-area-inset-top,0px) + 64px) 14px 14px}
+.sheet{width:min(340px,100%);max-height:calc(100vh - 100px);overflow-y:auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:10px;box-shadow:0 16px 40px rgba(0,0,0,.3)}
+.sh1{font-size:12px;color:var(--muted);padding:8px 12px 6px;font-weight:500}
+.mi{display:flex;justify-content:space-between;align-items:center;width:100%;padding:13px 14px;border-radius:12px;text-align:left;font-size:15px;font-weight:500}
+.mi.on{background:var(--soft);font-weight:600}
+.mi small{color:var(--muted);background:var(--soft);padding:2px 8px;border-radius:8px;font-size:12px}
+.mi.on small{background:var(--card)}
+
+/* Settings screen */
+.stc{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:var(--sh)}
+.stc h3{margin:0 0 10px;font-size:16px;font-weight:600}
+.stn{color:var(--muted);font-size:13px;margin:0 0 12px;line-height:1.5}
+.fo{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px;border-radius:14px;border:1.5px solid var(--line);margin-bottom:8px;background:var(--bg)}
+.fo.on{border-color:var(--g2);background:rgba(110,179,0,.1)}
+.fo .fs{flex:1;font-size:17px;line-height:1.4}
+.fo small{color:var(--muted);font-size:11px;flex:none;max-width:38%;text-align:right}
+.fo svg.i{color:var(--g2);flex:none}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:72px;padding:11px 8px;border-radius:12px;border:1.5px solid var(--line);font-size:14px;font-weight:500;background:var(--bg)}
+.seg button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
