@@ -233,12 +233,13 @@ svg.star.on{color:#f2b705;fill:#f2b705}
 .sr small{color:var(--muted);font-size:12px}
 .sr.on{border-color:var(--g2);box-shadow:0 0 0 2px rgba(110,179,0,.35)}
 .an2{font-family:"Amiri","Noto Naskh Arabic",serif;font-size:22px;font-weight:700;display:block;line-height:1.5}
-.mp{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(66px + env(safe-area-inset-bottom,0px));width:min(416px,calc(100% - 24px));background:var(--card);border:1px solid var(--line);border-radius:18px;padding:8px 12px;display:grid;grid-template-columns:1fr auto auto auto;grid-template-areas:"i b1 p b2" "r r r t";align-items:center;gap:4px 8px;box-shadow:0 8px 24px rgba(38,42,84,.2);z-index:4}
+.mp{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(66px + env(safe-area-inset-bottom,0px));width:min(416px,calc(100% - 24px));background:var(--card);border:1px solid var(--line);border-radius:18px;padding:8px 12px;display:grid;grid-template-columns:1fr auto auto auto auto;grid-template-areas:"i b1 p b2 x" "r r r r t";align-items:center;gap:4px 8px;box-shadow:0 8px 24px rgba(38,42,84,.2);z-index:4}
 .mpi{grid-area:i;min-width:0}
 .mpi small{color:var(--muted);font-size:12px}
 .mp #qpb{grid-area:p}
 .mp button:nth-of-type(2){grid-area:b1}
 .mp button:nth-of-type(3){grid-area:b2}
+.mp button:nth-of-type(4){grid-area:x}
 #qpr{grid-area:r;width:100%;accent-color:#6eb300}
 .tm2{grid-area:t;font-size:12px;color:var(--muted);white-space:nowrap}
 .pp{width:44px;height:44px;border-radius:50%;background:var(--g);color:#12200a;display:grid;place-items:center}

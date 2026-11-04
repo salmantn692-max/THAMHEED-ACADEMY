@@ -28,6 +28,7 @@ let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},S
 let W={m:'c',c:'1',i:0,t:'',r:false};
 const A=k=>DA[k]||[];
 const IC={
+close:'<path d="M18 6L6 18M6 6l12 12"/>',
 dl:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
 home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
 video:'<rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/>',
@@ -191,7 +192,7 @@ function home(){
   const nz=(AN||[]).slice().sort(nsort).slice(0,3);
   const tiles=Object.keys(T).map(k=>'<button class="cc" onclick="openList(\''+k+'\')"><div class="ic">'+ico(T[k][0])+'</div><b>'+T[k][1]+'</b></button>').join('')+'<button class="cc" onclick="openMP()"><div class="ic">'+ico('file')+'</div><b>Model Paper</b></button><button class="cc" onclick="openQuiz()"><div class="ic">'+ico('zap')+'</div><b>ക്വിസ്</b></button>'+(QCL.includes(String(me.cls))?'<button class="cc" onclick="openQuran()"><div class="ic">'+ico('moon')+'</div><b>ഖുർആൻ</b></button>':'');
   return '<section class="scr"><div class="top"><div><small>അസ്സലാമു അലൈക്കും</small><h2>'+esc(me.name)+'</h2></div><div class="tag">ക്ലാസ് '+esc(me.cls)+'</div></div>'
-  +'<div class="nb"><div class="nbh"><div class="bi">'+ico('bell')+'</div><b>നോട്ടീസ് ബോർഡ്</b>'+(AN&&AN.length>3?'<button class="more" onclick="openList(\'ann\')">എല്ലാം കാണുക</button>':'')+'</div>'+(AN===null?'<div class="cs">ലോഡ് ചെയ്യുന്നു…</div>':nz.length?nz.map(noticeCard).join(''):'<div class="cs">പുതിയ അറിയിപ്പുകളൊന്നുമില്ല</div>')+'</div>'
+  +(nz.length?'<div class="nb"><div class="nbh"><div class="bi">'+ico('bell')+'</div><b>നോട്ടീസ് ബോർഡ്</b>'+(AN&&AN.length>3?'<button class="more" onclick="openList(\'ann\')">എല്ലാം കാണുക</button>':'')+'</div>'+nz.map(noticeCard).join('')+'</div>':'')
   +carousel()+'<div class="sec"><h3>നിങ്ങളുടെ പഠനം</h3></div><div class="grid">'+tiles+'</div></section>';
 }
 function item(k,x){
@@ -924,7 +925,7 @@ function quranView(){
 }
 function miniPlayer(){
   const s=SU[QP.n-1];
-  return '<div class="mp"><div class="mpi"><b class="an2" lang="ar" dir="rtl">'+s[0]+'</b><small>'+s[1]+'</small></div><input id="qpr" type="range" min="0" max="100" step="0.1" value="'+(AU.duration?AU.currentTime/AU.duration*100:0)+'" oninput="qSeek(this.value)" aria-label="Seek"><span id="qpt" class="tm2">'+fmt(AU.currentTime)+' / '+fmt(AU.duration)+'</span><button class="pp" id="qpb" onclick="qToggle()" aria-label="Play or pause">'+ico(AU.paused?'play2':'pause')+'</button><button class="pp sm" onclick="qNext(-1)" aria-label="Previous">'+ico('skipb')+'</button><button class="pp sm" onclick="qNext(1)" aria-label="Next">'+ico('skipf')+'</button></div>';
+  return '<div class="mp"><div class="mpi"><b class="an2" lang="ar" dir="rtl">'+s[0]+'</b><small>'+s[1]+'</small></div><input id="qpr" type="range" min="0" max="100" step="0.1" value="'+(AU.duration?AU.currentTime/AU.duration*100:0)+'" oninput="qSeek(this.value)" aria-label="Seek"><span id="qpt" class="tm2">'+fmt(AU.currentTime)+' / '+fmt(AU.duration)+'</span><button class="pp" id="qpb" onclick="qToggle()" aria-label="Play or pause">'+ico(AU.paused?'play2':'pause')+'</button><button class="pp sm" onclick="qNext(-1)" aria-label="Previous">'+ico('skipb')+'</button><button class="pp sm" onclick="qNext(1)" aria-label="Next">'+ico('skipf')+'</button><button class="pp sm xc" onclick="qClose()" aria-label="Close">'+ico('close')+'</button></div>';
 }
 function setMedia(n){
   try{
@@ -947,6 +948,7 @@ async function qPlay(n){
   }catch(e){console.error(e);toast(errMsg(e,'പ്ലേ ചെയ്യാൻ കഴിഞ്ഞില്ല. ഇന്റർനെറ്റ് / ഫയൽ പരിശോധിക്കൂ.'))}
   render();
 }
+function qClose(){try{AU.pause();AU.currentTime=0}catch(e){}QP.n=0;try{if('mediaSession' in navigator)navigator.mediaSession.metadata=null}catch(e){}render()}
 function qToggle(){if(AU.paused)AU.play().catch(()=>{});else AU.pause()}
 function qSeek(v){if(AU.duration)AU.currentTime=v/100*AU.duration}
 function qNext(d){
@@ -1017,7 +1019,7 @@ function render(){
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
   car();
 }
-Object.assign(window,{doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
+Object.assign(window,{qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
 
 async function boot(){
   render();
