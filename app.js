@@ -193,7 +193,7 @@ function noticeCard(x){
 }
 function home(){
   const nz=(AN||[]).slice().sort(nsort).slice(0,3);
-  const tiles=Object.keys(T).map(k=>'<button class="cc" onclick="openList(\''+k+'\')"><div class="ic">'+ico(T[k][0])+'</div><b>'+T[k][1]+'</b></button>').join('')+'<button class="cc" onclick="openMP()"><div class="ic">'+ico('file')+'</div><b>Model Paper</b></button><button class="cc" onclick="openQuiz()"><div class="ic">'+ico('zap')+'</div><b>ക്വിസ്</b></button>'+(QCL.includes(String(me.cls))?'<button class="cc" onclick="openQuran()"><div class="ic">'+ico('moon')+'</div><b>ഖുർആൻ</b></button>':'')+'<button class="cc" onclick="go(\'set\')"><div class="ic">'+ico('sliders')+'</div><b>സെറ്റിംഗ്സ്</b></button>';
+  const tiles=Object.keys(T).map(k=>'<button class="cc" onclick="openList(\''+k+'\')"><div class="ic">'+ico(T[k][0])+'</div><b>'+T[k][1]+'</b></button>').join('')+'<button class="cc" onclick="openMP()"><div class="ic">'+ico('file')+'</div><b>Model Paper</b></button><button class="cc" onclick="openQuiz()"><div class="ic">'+ico('zap')+'</div><b>ക്വിസ്</b></button>'+(QCL.includes(String(me.cls))?'<button class="cc" onclick="openQuran()"><div class="ic">'+ico('moon')+'</div><b>ഖുർആൻ</b></button>':'');
   return '<section class="scr"><div class="top"><div><small>അസ്സലാമു അലൈക്കും</small><h2>'+esc(me.name)+'</h2></div><div class="tag">ക്ലാസ് '+esc(me.cls)+'</div></div>'
   +(nz.length?'<div class="nb"><div class="nbh"><div class="bi">'+ico('bell')+'</div><b>നോട്ടീസ് ബോർഡ്</b>'+(AN&&AN.length>3?'<button class="more" onclick="openList(\'ann\')">എല്ലാം കാണുക</button>':'')+'</div>'+nz.map(noticeCard).join('')+'</div>':'')
   +carousel()+'<div class="sec"><h3>നിങ്ങളുടെ പഠനം</h3></div><div class="grid">'+tiles+'</div></section>';
