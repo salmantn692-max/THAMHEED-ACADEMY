@@ -16,7 +16,7 @@ const CL=['1','2','3','4','5','6','7','8','9','10','+1','+2'];
 const S={
 students:{l:'വിദ്യാർത്ഥികൾ',f:[['id','Student ID'],['name','പേര്'],['cls','ക്ലാസ്']]},
 live:{l:'Live ക്ലാസ്',f:[['t','തലക്കെട്ട്'],['time','സമയം'],['url','Link (https://…)'],['cls','ക്ലാസ്']]},
-yt:{l:'YouTube',f:[['t','തലക്കെട്ട്'],['url','YouTube Link'],['cls','ക്ലാസ്']]},
+yt:{l:'YouTube',f:[['t','തലക്കെട്ട്'],['url','YouTube Link (വീഡിയോ ലിങ്ക് ഒട്ടിച്ചാൽ ചിത്രം തനിയെ വരും)'],['cls','ക്ലാസ്']]},
 ann:{l:'അറിയിപ്പുകൾ',f:[['t','തലക്കെട്ട്'],['b','വിവരം'],['cls','ക്ലാസ്'],['imp','പ്രധാനപ്പെട്ടതാണോ?',['No','Yes']]]},
 slides:{l:'സ്ലൈഡുകൾ',f:[['t','തലക്കെട്ട് (ഓപ്ഷണൽ)'],['url','Link (WhatsApp ഗ്രൂപ്പ് / YouTube / സൈറ്റ്)'],['cls','ക്ലാസ്']]},
 subjects:{l:'വിഷയങ്ങൾ',f:[['name','വിഷയം (English)'],['ar','അറബി പേര് (ഓപ്ഷണൽ)'],['cls','ക്ലാസ്'],['soon','Coming soon ആണോ?',['No','Yes']]]}
@@ -88,6 +88,7 @@ async function loadHome(){
   render();
 }
 async function openList(k){
+  if(k==='yt')YT.cur='';
   if(k==='tt'){openTT();return}
   if(k==='att'){openAtt();return}
   if(k==='notes'){openLib();return}
@@ -203,7 +204,7 @@ function item(k,x){
   return '<div class="ol"><div class="n">'+ico(T[k][0])+'</div><div class="t">'+esc(ti)+'<small>'+esc(sm)+'</small></div>'+(u?'<a class="pl" href="'+u+'" target="_blank" rel="noopener" aria-label="Open">'+ico('ext')+'</a>':'')+'</div>';
 }
 function list(){
-  const k=V.k;if(k==='tt')return ttView();if(k==='att')return attView();if(k==='live')return liveView();let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T[k][1]+'</span><span style="width:44px"></span></div>';
+  const k=V.k;if(k==='yt')return ytView();if(k==='tt')return ttView();if(k==='att')return attView();if(k==='live')return liveView();let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T[k][1]+'</span><span style="width:44px"></span></div>';
   if(k==='att'){const p=+me.p||0,t=+me.t||0,pc=t?Math.round(p*100/t):0;h+='<div class="ban"><small>ഹാജർ</small><b>'+pc+'%</b><small>'+p+' / '+t+' ദിവസം</small><div class="pb"><i style="width:'+pc+'%"></i></div></div>'}
   else if(LST===null)h+='<div class="empty">ലോഡ് ചെയ്യുന്നു…</div>';
   else if(!LST.length)h+='<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div>';
@@ -218,7 +219,7 @@ function edit(id){V.ed=id;render()}
 function lst(){
   const c=S[V.sec],a=A(V.sec);
   if(!a.length)return '<div class="empty">ഒന്നുമില്ല. ചേർക്കൂ.</div>';
-  return a.map(x=>'<div class="ol">'+(isimg(x.img)?'<img class="th" alt="" src="'+x.img+'">':'')+'<div class="t">'+esc(x[c.f[0][0]]||(x.img?'(ചിത്ര സ്ലൈഡ്)':''))+'<small>'+esc(x[c.f[1][0]])+(c.f[2]?' · '+esc(x[c.f[2][0]]):'')+'</small></div><button class="pl" onclick="edit(\''+x._id+'\')" aria-label="Edit">'+ico('edit')+'</button><button class="pl'+(V.cd===x._id?' dng':'')+'" onclick="del(\''+x._id+'\')" aria-label="Delete">'+ico('trash')+'</button></div>').join('');
+  return a.map(x=>'<div class="ol">'+(isimg(x.img)?'<img class="th" alt="" src="'+x.img+'">':(V.sec==='yt'&&ytId(x.url)?'<img class="th yt" alt="" src="'+ytThumb(ytId(x.url))+'">':''))+'<div class="t">'+esc(x[c.f[0][0]]||(x.img?'(ചിത്ര സ്ലൈഡ്)':''))+'<small>'+esc(x[c.f[1][0]])+(c.f[2]?' · '+esc(x[c.f[2][0]]):'')+'</small></div><button class="pl" onclick="edit(\''+x._id+'\')" aria-label="Edit">'+ico('edit')+'</button><button class="pl'+(V.cd===x._id?' dng':'')+'" onclick="del(\''+x._id+'\')" aria-label="Delete">'+ico('trash')+'</button></div>').join('');
 }
 function refresh(){const l=$('lst');if(l&&V.sec!=='wa')l.innerHTML=V.sec==='papers'?lstP():V.sec==='ttf'?lstT():V.sec==='lib'?lstL():V.sec==='quran'?lstQ():lst();const c=$('chips');if(c)c.innerHTML=chips()}
 function pick(i){
@@ -1059,6 +1060,41 @@ function setView(){
   return h+'</section>';
 }
 applySet();
+
+/* ---------- YouTube videos ---------- */
+function ytId(u){
+  const m=String(u||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{11})/);
+  return m?m[1]:'';
+}
+const ytList=u=>{const m=String(u||'').match(/[?&]list=([\w-]+)/);return m?m[1]:''};
+const ytThumb=id=>'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg';
+let YT={cur:''};
+function ytPlay(id){try{AU.pause()}catch(e){}YT.cur=id;render();window.scrollTo(0,0)}
+function ytBack(){if(YT.cur){YT.cur='';render()}else go('home');window.scrollTo(0,0)}
+function ytSrc(u){
+  const id=ytId(u),ls=ytList(u),q='autoplay=1&rel=0&modestbranding=1&playsinline=1';
+  if(id)return 'https://www.youtube-nocookie.com/embed/'+id+'?'+q+(ls?'&list='+ls:'');
+  if(ls)return 'https://www.youtube-nocookie.com/embed/videoseries?list='+ls+'&'+q;
+  return '';
+}
+function ytCard(x){
+  const id=ytId(x.url),th=id?'background-image:url('+ytThumb(id)+')':'';
+  return '<button class="yc" onclick="'+(ytSrc(x.url)?'ytPlay(\''+x._id+'\')':'window.open(\''+safe(x.url)+'\',\'_blank\',\'noopener\')')+'"><span class="ytn" style="'+th+'"><span class="pb2"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span></span><span class="ytt">'+esc(x.t)+'</span></button>';
+}
+function ytView(){
+  let h='<section class="scr"><div class="bar"><button onclick="ytBack()" aria-label="Back">'+ico('back')+'</button><span>'+T.yt[1]+'</span><span style="width:44px"></span></div>';
+  if(LST===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+  if(!LST.length)return h+'<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div></section>';
+  const cur=YT.cur?LST.find(x=>x._id===YT.cur):null;
+  if(cur){
+    h+='<div class="yp"><iframe src="'+ytSrc(cur.url)+'" title="'+esc(cur.t)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div><h2 class="yh">'+esc(cur.t)+'</h2>';
+    if(safe(cur.url))h+='<a class="cta ghost" style="max-width:none;margin-top:6px" href="'+safe(cur.url)+'" target="_blank" rel="noopener">'+ico('ext')+' YouTube-ൽ തുറക്കുക</a>';
+    const rest=LST.filter(x=>x._id!==cur._id);
+    if(rest.length)h+='<div class="sec" style="margin-top:22px"><h3>മറ്റ് വീഡിയോകൾ</h3></div><div class="ygrid">'+rest.map(ytCard).join('')+'</div>';
+    return h+'</section>';
+  }
+  return h+'<div class="ygrid">'+LST.map(ytCard).join('')+'</div></section>';
+}
 
 /* ---------- shell ---------- */
 
