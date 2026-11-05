@@ -1062,11 +1062,11 @@ applySet();
 
 /* ---------- shell ---------- */
 
-function navh(){return '<nav><div class="brand"><img src="icon-192.png" alt=""><b>Thamheed Academy</b></div>'+(me?'<button class="'+(V.s!=='admin'&&V.s!=='set'?'on':'')+'" onclick="go(\'home\')">'+ico('home')+'<span>Home</span></button>':'')+'<button class="'+(V.s==='set'?'on':'')+'" onclick="go(\'set\')">'+ico('sliders')+'<span>Settings</span></button>'+(adm?'<button class="'+(V.s==='admin'?'on':'')+'" onclick="go(\'admin\')">'+ico('shield')+'<span>Admin</span></button>':'')+'<button onclick="out()">'+ico('out')+'<span>Exit</span></button></nav>'}
+function navh(){return '<nav><div class="brand"><img src="icon-192.png" alt=""><b>Thamheed Academy</b></div>'+(me?'<button class="'+(V.s!=='admin'&&V.s!=='set'?'on':'')+'" onclick="go(\'home\')">'+ico('home')+'<span>Home</span></button>':'')+(adm?'<button class="'+(V.s==='set'?'on':'')+'" onclick="go(\'set\')">'+ico('sliders')+'<span>Settings</span></button>':'')+(adm?'<button class="'+(V.s==='admin'?'on':'')+'" onclick="go(\'admin\')">'+ico('shield')+'<span>Admin</span></button>':'')+'<button onclick="out()">'+ico('out')+'<span>Exit</span></button></nav>'}
 function render(){
   if((V.s==='home'||V.s==='list'||V.s==='mp'||V.s==='lib'||V.s==='quiz'||V.s==='quran')&&!me)V.s='login';
   if(V.s==='admin'&&!adm)V.s='login';
-  if(V.s==='set'&&!me&&!adm)V.s='login';
+  if(V.s==='set'&&!adm)V.s=me?'home':'login';
   const s=V.s;
   const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='lib'?libView():s==='quiz'?quizView():s==='quran'?quranView():s==='set'?setView():s==='admin'?admin():'<section class="scr hero"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
   const nav=s==='home'||s==='list'||s==='mp'||s==='lib'||s==='quiz'||s==='quran'||s==='set'||s==='admin';
