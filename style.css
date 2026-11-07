@@ -438,3 +438,15 @@ nav button .bdg{position:absolute;top:0;left:calc(50% + 6px);min-width:18px;heig
 .mecard b{display:block;font-size:20px;font-weight:600}
 .mecard small{color:var(--muted);font-size:14px}
 .av{width:64px;height:64px;border-radius:50%;background:var(--ico);color:#fff;display:grid;place-items:center;font-size:26px;font-weight:600;flex:none}
+
+/* Rotating icon colours: logo green, indigo, teal (shifts every time a screen opens or you go back) */
+.app{--c1:#625d80;--c2:#5c9a00;--c3:#2a7f9e}
+.app.ph1{--c1:#5c9a00;--c2:#2a7f9e;--c3:#625d80}
+.app.ph2{--c1:#2a7f9e;--c2:#625d80;--c3:#5c9a00}
+.grid>*:nth-child(3n+1) .ic{background:var(--c1)}
+.grid>*:nth-child(3n+2) .ic{background:var(--c2)}
+.grid>*:nth-child(3n) .ic{background:var(--c3)}
+.ol:nth-child(3n+1) .n{background:var(--c1)}
+.ol:nth-child(3n+2) .n{background:var(--c2)}
+.ol:nth-child(3n) .n{background:var(--c3)}
+.ol.rowb.dng .n{background:#c0392b}
