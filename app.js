@@ -1109,7 +1109,7 @@ function render(){
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
   car();
 }
-Object.assign(window,{setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
+Object.assign(window,{ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
 
 async function boot(){
   render();
