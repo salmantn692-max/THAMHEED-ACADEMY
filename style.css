@@ -423,3 +423,18 @@ html[data-fs="xl"] #app{zoom:1.25}
 .app.anim .cal i:nth-child(41){animation-delay:492ms}
 .app.anim .cal i:nth-child(42){animation-delay:504ms}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Bottom bar: study / me */
+@media (max-width:899px){nav button{flex:1;padding:6px 4px;min-width:0}}
+@media (min-width:900px){nav button{flex:none}nav button .bdg{right:12px;top:50%;transform:translateY(-50%)}}
+nav button .bdg{position:absolute;top:0;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#e0574d;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;line-height:1}
+.cc{position:relative}
+.ld{position:absolute;top:12px;right:12px;width:11px;height:11px;border-radius:50%;background:#e0574d;animation:pulse 1.4s infinite}
+.rowb{width:100%;text-align:left;font:inherit;color:var(--text)}
+.rowb>svg.i:last-child{color:var(--muted)}
+.rowb.dng .n{background:#c0392b}
+.rowb.dng .t{color:#c0392b}
+.mecard{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:var(--sh)}
+.mecard b{display:block;font-size:20px;font-weight:600}
+.mecard small{color:var(--muted);font-size:14px}
+.av{width:64px;height:64px;border-radius:50%;background:var(--ico);color:#fff;display:grid;place-items:center;font-size:26px;font-weight:600;flex:none}

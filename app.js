@@ -28,6 +28,7 @@ let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},S
 let W={m:'c',c:'1',i:0,t:'',r:false};
 const A=k=>DA[k]||[];
 const IC={
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
 tick:'<path d="M5 13l4 4L19 7"/>',
 sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
 dots:'<circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/>',
@@ -65,13 +66,13 @@ const ico=n=>'<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColo
 
 
 function toast(m){const e=$('toast');if(!e)return;e.textContent=m;e.classList.add('on');clearTimeout(tmr);tmr=setTimeout(()=>e.classList.remove('on'),2400)}
-let HT=0,LK='';
+let HT=0,LK='',BK='home';
 async function refreshHome(){
   HT=Date.now();
   try{await homeData()}catch(e){}
   if(V.s==='home')render();
 }
-function go(s,k){V.s=s;V.k=k||'';render();window.scrollTo(0,0);if(s==='home'&&me&&AN!==null&&Date.now()-HT>60000)refreshHome()}
+function go(s,k){if(s==='study'||s==='me')BK=s;else if(s==='home')BK='home';V.s=s;V.k=k||'';render();window.scrollTo(0,0);if(s==='home'&&me&&AN!==null&&Date.now()-HT>60000)refreshHome()}
 
 /* ---------- data ---------- */
 async function fetchK(k){
@@ -204,7 +205,7 @@ function item(k,x){
   return '<div class="ol"><div class="n">'+ico(T[k][0])+'</div><div class="t">'+esc(ti)+'<small>'+esc(sm)+'</small></div>'+(u?'<a class="pl" href="'+u+'" target="_blank" rel="noopener" aria-label="Open">'+ico('ext')+'</a>':'')+'</div>';
 }
 function list(){
-  const k=V.k;if(k==='yt')return ytView();if(k==='tt')return ttView();if(k==='att')return attView();if(k==='live')return liveView();let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T[k][1]+'</span><span style="width:44px"></span></div>';
+  const k=V.k;if(k==='yt')return ytView();if(k==='tt')return ttView();if(k==='att')return attView();if(k==='live')return liveView();let h='<section class="scr"><div class="bar"><button onclick="goBack()" aria-label="Back">'+ico('back')+'</button><span>'+T[k][1]+'</span><span style="width:44px"></span></div>';
   if(k==='att'){const p=+me.p||0,t=+me.t||0,pc=t?Math.round(p*100/t):0;h+='<div class="ban"><small>ഹാജർ</small><b>'+pc+'%</b><small>'+p+' / '+t+' ദിവസം</small><div class="pb"><i style="width:'+pc+'%"></i></div></div>'}
   else if(LST===null)h+='<div class="sk"><i></i><i></i><i></i></div>';
   else if(!LST.length)h+='<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div>';
@@ -341,7 +342,7 @@ async function openMP(){
   }catch(e){SUBS=[];PAP=[];toast(errMsg(e,'ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല.'))}
   render();
 }
-function mpBack(){if(MP.step==='paper'){MP.step='exam';render()}else if(MP.step==='exam'){MP.step='sub';render()}else go('home');window.scrollTo(0,0)}
+function mpBack(){if(MP.step==='paper'){MP.step='exam';render()}else if(MP.step==='exam'){MP.step='sub';render()}else go(BK);window.scrollTo(0,0)}
 function mpSub(id){MP.sub=id;MP.step='exam';render();window.scrollTo(0,0)}
 function mpPaper(id){
   MP.paper=id;MP.step='paper';render();window.scrollTo(0,0);
@@ -458,7 +459,7 @@ async function openTT(){
   }
 }
 function ttView(){
-  let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T.tt[1]+'</span><span style="width:44px"></span></div>';
+  let h='<section class="scr"><div class="bar"><button onclick="goBack()" aria-label="Back">'+ico('back')+'</button><span>'+T.tt[1]+'</span><span style="width:44px"></span></div>';
   if(TF===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
   if(!TF.length)return h+'<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div></section>';
   return h+TF.map(f=>{
@@ -573,7 +574,7 @@ async function loadAtt(m){
 async function openAtt(){V.s='list';V.k='att';ATM=ym(new Date());render();window.scrollTo(0,0);await loadAtt(ATM)}
 function atMove(n){const [y,mo]=ATM.split('-').map(Number);ATM=ym(new Date(y,mo-1+n,1));render();loadAtt(ATM)}
 function attView(){
-  let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T.att[1]+'</span><span style="width:44px"></span></div>';
+  let h='<section class="scr"><div class="bar"><button onclick="goBack()" aria-label="Back">'+ico('back')+'</button><span>'+T.att[1]+'</span><span style="width:44px"></span></div>';
   const [y,mo]=ATM.split('-').map(Number),d=ATC[ATM],first=new Date(y,mo-1,1).getDay(),n=new Date(y,mo,0).getDate();
   h+='<div class="mnav"><button class="pl" onclick="atMove(-1)" aria-label="Previous month">'+ico('back')+'</button><b>'+MN[mo-1]+' '+y+'</b><button class="pl" onclick="atMove(1)" aria-label="Next month">'+ico('right')+'</button></div>';
   if(d===undefined)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
@@ -656,7 +657,7 @@ async function openLib(){
   render();
 }
 function libPick(k){LB.kind=k;LB.step='list';render();window.scrollTo(0,0)}
-function libBack(){if(LB.step==='list'){LB.step='menu';render()}else go('home');window.scrollTo(0,0)}
+function libBack(){if(LB.step==='list'){LB.step='menu';render()}else go(BK);window.scrollTo(0,0)}
 function libView(){
   let h='<section class="scr"><div class="bar"><button onclick="libBack()" aria-label="Back">'+ico('back')+'</button><span>Notes &amp; Syllabus</span><span style="width:44px"></span></div>';
   if(LB.step==='menu')return h+'<p class="mu">ഒന്ന് തിരഞ്ഞെടുക്കൂ</p><div class="grid"><button class="cc" onclick="libPick(\'book\')"><div class="ic">'+ico('book')+'</div><b>'+KL.book+'</b></button><button class="cc" onclick="libPick(\'syll\')"><div class="ic">'+ico('clip')+'</div><b>'+KL.syll+'</b></button></div></section>';
@@ -731,7 +732,7 @@ async function delL(id){
 }
 
 function liveView(){
-  let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T.live[1]+'</span><span style="width:44px"></span></div>';
+  let h='<section class="scr"><div class="bar"><button onclick="goBack()" aria-label="Back">'+ico('back')+'</button><span>'+T.live[1]+'</span><span style="width:44px"></span></div>';
   if(LST===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
   if(!LST.length)return h+'<div class="lempty"><div class="ic">'+ico('video')+'</div><h2>ഇപ്പോൾ Live ക്ലാസ് ഷെഡ്യൂൾ ചെയ്തിട്ടില്ല</h2><p class="mu">പുതിയ ക്ലാസ് വരുമ്പോൾ ഇവിടെ കാണാം.</p></div></section>';
   const f=LST[0],rest=LST.slice(1);
@@ -781,7 +782,7 @@ function qzNext(){
   QZ.i++;QZ.pick=-1;render();window.scrollTo(0,0);
 }
 function qzBack(){
-  if(QZ.step==='sub')go('home');
+  if(QZ.step==='sub')go(BK);
   else if(QZ.step==='ch'){QZ.step='sub';render()}
   else{QZ.step='ch';render()}
   window.scrollTo(0,0);
@@ -922,7 +923,7 @@ async function homeData(){
 }
 function openQuran(){V.s='quran';render();window.scrollTo(0,0)}
 function quranView(){
-  let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>ഖുർആൻ</span><span style="width:44px"></span></div>';
+  let h='<section class="scr"><div class="bar"><button onclick="goBack()" aria-label="Back">'+ico('back')+'</button><span>ഖുർആൻ</span><span style="width:44px"></span></div>';
   if(QRC)h+='<p class="mu" style="text-align:center">ഖാരിഅ്: '+esc(QRC)+'</p>';
   const l=[...QAV].sort((a,b)=>a-b).filter(n=>SU[n-1]);
   if(!l.length)return h+'<div class="cs">ഓഡിയോ ഉടൻ ലഭ്യമാകും</div></section>';
@@ -1070,7 +1071,7 @@ const ytList=u=>{const m=String(u||'').match(/[?&]list=([\w-]+)/);return m?m[1]:
 const ytThumb=id=>'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg';
 let YT={cur:''};
 function ytPlay(id){try{AU.pause()}catch(e){}YT.cur=id;render();window.scrollTo(0,0)}
-function ytBack(){if(YT.cur){YT.cur='';render()}else go('home');window.scrollTo(0,0)}
+function ytBack(){if(YT.cur){YT.cur='';render()}else go(BK);window.scrollTo(0,0)}
 function ytSrc(u){
   const id=ytId(u),ls=ytList(u),q='autoplay=1&rel=0&modestbranding=1&playsinline=1';
   if(id)return 'https://www.youtube-nocookie.com/embed/'+id+'?'+q+(ls?'&list='+ls:'');
@@ -1098,7 +1099,46 @@ function ytView(){
 
 /* ---------- shell ---------- */
 
-function navh(){return '<nav><div class="brand"><img src="icon-192.png" alt=""><b>Thamheed Academy</b></div>'+(me?'<button class="'+(V.s!=='admin'&&V.s!=='set'?'on':'')+'" onclick="go(\'home\')">'+ico('home')+'<span>Home</span></button>':'')+(adm?'<button class="'+(V.s==='set'?'on':'')+'" onclick="go(\'set\')">'+ico('sliders')+'<span>Settings</span></button>':'')+(adm?'<button class="'+(V.s==='admin'?'on':'')+'" onclick="go(\'admin\')">'+ico('shield')+'<span>Admin</span></button>':'')+'<button onclick="out()">'+ico('out')+'<span>Exit</span></button></nav>'}
+let MEF=false;
+function goBack(){go(BK)}
+function navTo(k){BK='home';if(k==='quiz')openQuiz();else openQuran()}
+function meOut(){
+  if(!MEF){MEF=true;render();setTimeout(()=>{MEF=false;if(V.s==='me')render()},4000);return}
+  MEF=false;out();
+}
+function studyView(){
+  const tl=(ic,lb,act,dot)=>'<button class="cc" onclick="'+act+'">'+(dot?'<span class="ld"></span>':'')+'<div class="ic">'+ico(ic)+'</div><b>'+lb+'</b></button>';
+  return '<section class="scr"><div class="top"><div><small>പഠനം</small><h2>എന്താണ് പഠിക്കേണ്ടത്?</h2></div></div><div class="grid">'
+    +tl(T.live[0],T.live[1],"openList('live')",LV&&LV.length)
+    +tl(T.yt[0],T.yt[1],"openList('yt')",0)
+    +tl(T.notes[0],T.notes[1],"openList('notes')",0)
+    +tl('file','Model Paper',"openMP()",0)
+    +tl(T.tt[0],T.tt[1],"openList('tt')",0)
+    +'</div></section>';
+}
+function meView(){
+  const ini=String(me.name||'?').trim().charAt(0).toUpperCase();
+  const row=(ic,t,s,act,cl)=>'<button class="ol rowb'+(cl?' '+cl:'')+'" onclick="'+act+'"><div class="n">'+ico(ic)+'</div><div class="t">'+t+(s?'<small>'+s+'</small>':'')+'</div>'+(cl?'':ico('right'))+'</button>';
+  return '<section class="scr">'+instHelp()+'<div class="mecard"><div class="av">'+esc(ini)+'</div><div><b>'+esc(me.name)+'</b><small>ക്ലാസ് '+esc(me.cls)+'</small></div></div>'
+    +row('check','ഹാജർ','മാസം തിരിച്ചുള്ള കലണ്ടർ',"openList('att')")
+    +(isStandalone()?'':row('dl','ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യൂ','ഹോം സ്ക്രീനിൽ ഐക്കൺ ചേർക്കാൻ',"doInstall()"))
+    +row('out',MEF?'ഉറപ്പാണോ? ഒരിക്കൽ കൂടി അമർത്തൂ':'Exit (ലോഗൗട്ട്)','വീണ്ടും Student ID നൽകേണ്ടി വരും',"meOut()",'dng')
+    +'</section>';
+}
+function navh(){
+  const s=V.s,k=V.k,nb=(AN||[]).filter(x=>x.imp==='Yes'||(x.ts&&Date.now()-x.ts<3*864e5)).length;
+  const B=(on,act,ic,lb,bd)=>'<button class="'+(on?'on':'')+'" onclick="'+act+'">'+ico(ic)+'<span>'+lb+'</span>'+(bd?'<b class="bdg">'+bd+'</b>':'')+'</button>';
+  let h='<nav><div class="brand"><img src="icon-192.png" alt=""><b>Thamheed Academy</b></div>';
+  if(me){
+    h+=B(s==='home'||(s==='list'&&k==='ann'),"go('home')",'home','Home',s==='home'?0:nb);
+    h+=B(s==='study'||s==='mp'||s==='lib'||(s==='list'&&['live','yt','notes','tt'].includes(k)),"go('study')",'layers','പഠനം',0);
+    h+=B(s==='quiz',"navTo('quiz')",'zap','ക്വിസ്',0);
+    if(QCL.includes(String(me.cls)))h+=B(s==='quran',"navTo('quran')",'moon','ഖുർആൻ',0);
+    h+=B(s==='me'||(s==='list'&&k==='att'),"go('me')",'user','ഞാൻ',0);
+  }
+  if(adm)h+=B(s==='set',"go('set')",'sliders','Settings',0)+B(s==='admin',"go('admin')",'shield','Admin',0)+B(false,'out()','out','Exit',0);
+  return h+'</nav>';
+}
 const RM=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}};
 function confetti(){
   const c=document.createElement('div');c.className='cf';c.setAttribute('aria-hidden','true');
@@ -1122,18 +1162,18 @@ function anim(){
   if(V.s==='quiz'&&QZ.step==='res'&&!QZ.cf){QZ.cf=1;if(QZ.qs&&QZ.qs.length&&QZ.sc/QZ.qs.length>=.9)confetti()}
 }
 function render(){
-  if((V.s==='home'||V.s==='list'||V.s==='mp'||V.s==='lib'||V.s==='quiz'||V.s==='quran')&&!me)V.s='login';
+  if((V.s==='home'||V.s==='list'||V.s==='mp'||V.s==='lib'||V.s==='quiz'||V.s==='quran'||V.s==='study'||V.s==='me')&&!me)V.s='login';
   if(V.s==='admin'&&!adm)V.s='login';
   if(V.s==='set'&&!adm)V.s=me?'home':'login';
   const s=V.s;
-  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='lib'?libView():s==='quiz'?quizView():s==='quran'?quranView():s==='set'?setView():s==='admin'?admin():'<section class="scr hero"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
-  const nav=s==='home'||s==='list'||s==='mp'||s==='lib'||s==='quiz'||s==='quran'||s==='set'||s==='admin';
+  const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='lib'?libView():s==='quiz'?quizView():s==='quran'?quranView():s==='study'?studyView():s==='me'?meView():s==='set'?setView():s==='admin'?admin():'<section class="scr hero"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
+  const nav=s==='home'||s==='list'||s==='mp'||s==='lib'||s==='quiz'||s==='quran'||s==='study'||s==='me'||s==='set'||s==='admin';
   const key=s+':'+V.k+':'+(s==='quiz'?QZ.step:'')+(s==='mp'?MP.step:'')+(s==='lib'?LB.step:'')+(s==='admin'?V.sec:'');
   const an=key!==LK;LK=key;
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+(an?' anim':'')+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
   car();anim();
 }
-Object.assign(window,{ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
+Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
 
 async function boot(){
   render();
