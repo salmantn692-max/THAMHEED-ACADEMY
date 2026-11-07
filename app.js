@@ -65,7 +65,7 @@ const ico=n=>'<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColo
 
 
 function toast(m){const e=$('toast');if(!e)return;e.textContent=m;e.classList.add('on');clearTimeout(tmr);tmr=setTimeout(()=>e.classList.remove('on'),2400)}
-let HT=0;
+let HT=0,LK='';
 async function refreshHome(){
   HT=Date.now();
   try{await homeData()}catch(e){}
@@ -206,7 +206,7 @@ function item(k,x){
 function list(){
   const k=V.k;if(k==='yt')return ytView();if(k==='tt')return ttView();if(k==='att')return attView();if(k==='live')return liveView();let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T[k][1]+'</span><span style="width:44px"></span></div>';
   if(k==='att'){const p=+me.p||0,t=+me.t||0,pc=t?Math.round(p*100/t):0;h+='<div class="ban"><small>ഹാജർ</small><b>'+pc+'%</b><small>'+p+' / '+t+' ദിവസം</small><div class="pb"><i style="width:'+pc+'%"></i></div></div>'}
-  else if(LST===null)h+='<div class="empty">ലോഡ് ചെയ്യുന്നു…</div>';
+  else if(LST===null)h+='<div class="sk"><i></i><i></i><i></i></div>';
   else if(!LST.length)h+='<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div>';
   else h+=(k==='ann'?LST.slice().sort(nsort).map(noticeCard):LST.map(x=>item(k,x))).join('');
   return h+'</section>';
@@ -367,7 +367,7 @@ async function mpOpen(share){
 }
 function mp(){
   let h='<section class="scr"><div class="bar"><button onclick="mpBack()" aria-label="Back">'+ico('back')+'</button><span>Model Paper</span><span style="width:44px"></span></div>';
-  if(SUBS===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+  if(SUBS===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
   if(MP.step==='sub'){
     if(!SUBS.length)return h+'<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div></section>';
     return h+'<div class="grid">'+SUBS.map(s=>{const soon=s.soon==='Yes';return '<button class="cc sj" '+(soon?'disabled':'onclick="mpSub(\''+s._id+'\')"')+'><div class="ic">'+ico('layers')+'</div>'+(s.ar?'<b class="ar" dir="auto">'+esc(s.ar)+'</b>':'')+'<b>'+esc(s.name)+'</b>'+(soon?'<div class="rb">COMING SOON</div>':'')+'</button>'}).join('')+'</div></section>';
@@ -459,12 +459,12 @@ async function openTT(){
 }
 function ttView(){
   let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T.tt[1]+'</span><span style="width:44px"></span></div>';
-  if(TF===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+  if(TF===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
   if(!TF.length)return h+'<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div></section>';
   return h+TF.map(f=>{
     const img=/^image\//.test(f.mime||''),u=TFU[f._id];
     return '<div class="tf"><div class="tfh"><b>'+esc(f.title)+'</b><button class="pl" onclick="tfOpen(\''+f._id+'\',1)" aria-label="Share">'+ico('share')+'</button></div>'
-      +(img?(u?'<img class="tfi" alt="'+esc(f.title)+'" src="'+u+'" onclick="tfOpen(\''+f._id+'\',0)">':'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div>')
+      +(img?(u?'<img class="tfi" alt="'+esc(f.title)+'" src="'+u+'" onclick="tfOpen(\''+f._id+'\',0)">':'<div class="sk"><i></i><i></i><i></i></div>')
       :'<div class="tfp"><div class="pbig sm">'+ico('file')+'</div><button class="cta" onclick="tfOpen(\''+f._id+'\',0)">'+ico('eye')+' Open Now</button></div>')+'</div>';
   }).join('')+'</section>';
 }
@@ -576,7 +576,7 @@ function attView(){
   let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T.att[1]+'</span><span style="width:44px"></span></div>';
   const [y,mo]=ATM.split('-').map(Number),d=ATC[ATM],first=new Date(y,mo-1,1).getDay(),n=new Date(y,mo,0).getDate();
   h+='<div class="mnav"><button class="pl" onclick="atMove(-1)" aria-label="Previous month">'+ico('back')+'</button><b>'+MN[mo-1]+' '+y+'</b><button class="pl" onclick="atMove(1)" aria-label="Next month">'+ico('right')+'</button></div>';
-  if(d===undefined)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+  if(d===undefined)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
   let p=0,a=0;Object.keys(d).forEach(k=>{if(d[k]==='P')p++;else if(d[k]==='A')a++});
   h+='<div class="ban att"><div><b>'+p+'</b><small>ഹാജർ ദിവസങ്ങൾ</small></div><div><b>'+a+'</b><small>അഭാവം</small></div></div>';
   h+='<div class="cal">'+['ഞാ','തി','ചൊ','ബു','വ്യാ','വെ','ശ'].map(x=>'<i class="wd">'+x+'</i>').join('');
@@ -612,7 +612,7 @@ async function atSave(){
 function attPanel(){
   const st=atStu(),dt=new Date(AT.date+'T00:00:00'),wd=['ഞായർ','തിങ്കൾ','ചൊവ്വ','ബുധൻ','വ്യാഴം','വെള്ളി','ശനി'][dt.getDay()]||'';
   let h='<div class="fm" style="max-width:720px"><h3>ദിവസത്തെ ഹാജർ</h3><label for="a_c">ക്ലാസ്</label><select id="a_c" onchange="atSel()">'+CL.map(x=>'<option'+(x===AT.cls?' selected':'')+'>'+x+'</option>').join('')+'</select><label for="a_d">തീയതി ('+wd+')</label><input id="a_d" type="date" value="'+AT.date+'" onchange="atSel()"></div>';
-  if(AT.busy)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div>';
+  if(AT.busy)return h+'<div class="sk"><i></i><i></i><i></i></div>';
   if(!st.length)return h+'<div class="empty">ഈ ക്ലാസിൽ വിദ്യാർത്ഥികൾ ഇല്ല.</div>';
   const p=st.filter(s=>AT.marks[s._id]==='P').length,a=st.filter(s=>AT.marks[s._id]==='A').length;
   h+='<div class="sec" style="margin-top:18px"><h3>'+st.length+' വിദ്യാർത്ഥികൾ · ഹാജർ '+p+' · അഭാവം '+a+'</h3></div><button class="cta ghost" style="max-width:none;margin:0 0 12px" onclick="atAll()">എല്ലാവരെയും ഹാജർ ആക്കുക</button>';
@@ -660,7 +660,7 @@ function libBack(){if(LB.step==='list'){LB.step='menu';render()}else go('home');
 function libView(){
   let h='<section class="scr"><div class="bar"><button onclick="libBack()" aria-label="Back">'+ico('back')+'</button><span>Notes &amp; Syllabus</span><span style="width:44px"></span></div>';
   if(LB.step==='menu')return h+'<p class="mu">ഒന്ന് തിരഞ്ഞെടുക്കൂ</p><div class="grid"><button class="cc" onclick="libPick(\'book\')"><div class="ic">'+ico('book')+'</div><b>'+KL.book+'</b></button><button class="cc" onclick="libPick(\'syll\')"><div class="ic">'+ico('clip')+'</div><b>'+KL.syll+'</b></button></div></section>';
-  if(LB.items===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+  if(LB.items===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
   const l=LB.items.filter(x=>x.kind===LB.kind);
   h+='<h2 class="mh">'+KL[LB.kind]+'</h2>';
   if(!l.length)return h+'<div class="cs" style="margin-top:16px">Coming soon</div></section>';
@@ -732,7 +732,7 @@ async function delL(id){
 
 function liveView(){
   let h='<section class="scr"><div class="bar"><button onclick="go(\'home\')" aria-label="Back">'+ico('back')+'</button><span>'+T.live[1]+'</span><span style="width:44px"></span></div>';
-  if(LST===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+  if(LST===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
   if(!LST.length)return h+'<div class="lempty"><div class="ic">'+ico('video')+'</div><h2>ഇപ്പോൾ Live ക്ലാസ് ഷെഡ്യൂൾ ചെയ്തിട്ടില്ല</h2><p class="mu">പുതിയ ക്ലാസ് വരുമ്പോൾ ഇവിടെ കാണാം.</p></div></section>';
   const f=LST[0],rest=LST.slice(1);
   const join=x=>safe(x.url)?'<a class="cta" href="'+safe(x.url)+'" target="_blank" rel="noopener">'+ico('video')+' ക്ലാസിൽ ചേരൂ</a>':'<div class="mu" style="text-align:center;margin:0">ലിങ്ക് ഉടൻ ലഭിക്കും</div>';
@@ -777,7 +777,7 @@ function qzAns(k){
   render();
 }
 function qzNext(){
-  if(QZ.i+1>=QZ.qs.length){QZ.step='res';qzSaveBest();render();window.scrollTo(0,0);return}
+  if(QZ.i+1>=QZ.qs.length){QZ.step='res';QZ.cf=0;qzSaveBest();render();window.scrollTo(0,0);return}
   QZ.i++;QZ.pick=-1;render();window.scrollTo(0,0);
 }
 function qzBack(){
@@ -789,29 +789,29 @@ function qzBack(){
 function quizView(){
   let h='<section class="scr"><div class="bar"><button onclick="qzBack()" aria-label="Back">'+ico('back')+'</button><span>ക്വിസ്</span>'+(QZ.step==='play'?'<span class="pts">'+ico('star')+QZ.pts+'</span>':'<span style="width:44px"></span>')+'</div>';
   if(QZ.step==='sub'){
-    if(QZ.subs===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+    if(QZ.subs===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
     if(!QZ.subs.length)return h+'<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div></section>';
     return h+'<p class="mu">ഒരു വിഷയം തിരഞ്ഞെടുക്കൂ</p><div class="grid">'+QZ.subs.map(s=>{const soon=s.soon==='Yes';return '<button class="cc sj" '+(soon?'disabled':'onclick="qzSub(\''+s._id+'\')"')+'><div class="ic">'+ico('zap')+'</div>'+(s.ar?'<b class="ar" dir="auto">'+esc(s.ar)+'</b>':'')+'<b>'+esc(s.name)+'</b>'+(soon?'<div class="rb">COMING SOON</div>':'')+'</button>'}).join('')+'</div></section>';
   }
   if(QZ.step==='ch'){
     h+='<h2 class="mh">'+esc(QZ.subn)+'</h2><p class="mu">ഒരു ചാപ്റ്റർ തിരഞ്ഞെടുക്കൂ</p>';
-    if(QZ.chs===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+    if(QZ.chs===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
     if(!QZ.chs.length)return h+'<div class="cs">ക്വിസ് ഉടൻ വരും</div></section>';
     return h+QZ.chs.map((c,i)=>{const b=qzBest(c),pc=b?b.sc/b.n:0,s=pc>=.9?3:pc>=.6?2:pc>=.3?1:0;return '<button class="px" onclick="qzCh('+i+')"><span class="pi">'+(i+1)+'</span><span class="pt"><b>'+esc(c)+'</b><small>'+(b?'മികച്ച സ്കോർ '+b.sc+' / '+b.n:'ഇതുവരെ കളിച്ചിട്ടില്ല')+'</small></span>'+(b?'<span class="mst">'+[1,2,3].map(x=>starI(x<=s)).join('')+'</span>':ico('right'))+'</button>'}).join('')+'</section>';
   }
-  if(QZ.step==='load')return h+'<div class="empty">ചോദ്യങ്ങൾ ഒരുങ്ങുന്നു…</div></section>';
+  if(QZ.step==='load')return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
   if(QZ.step==='empty')return h+'<div class="cs">ഈ ചാപ്റ്ററിൽ ചോദ്യങ്ങൾ ഉടൻ വരും</div></section>';
   if(QZ.step==='play'){
     const q=QZ.qs[QZ.i],n=QZ.qs.length,done=QZ.pick>=0;
     h+='<div class="qp"><i style="width:'+((QZ.i+(done?1:0))/n*100)+'%"></i></div><div class="qmeta"><span>ചോദ്യം '+(QZ.i+1)+' / '+n+'</span>'+(QZ.st>=2?'<span class="stk">'+ico('zap')+QZ.st+' തുടർച്ച</span>':'')+'</div>';
-    h+='<div class="qc"><h2 dir="auto">'+esc(q.q)+'</h2></div>';
-    h+=q.o.map((o,k)=>{let c='qo';if(done){if(o.ok)c+=' ok';else if(k===QZ.pick)c+=' bad';else c+=' dim'}return '<button class="'+c+'" '+(done?'disabled':'onclick="qzAns('+k+')"')+'><span class="lt2">'+'ABCD'[k]+'</span><span dir="auto">'+esc(o.t)+'</span></button>'}).join('');
+    h+='<div class="qc'+(done?'':' fresh')+'"><h2 dir="auto">'+esc(q.q)+'</h2></div>';
+    h+=q.o.map((o,k)=>{let c='qo'+(done?'':' in');if(done){if(o.ok)c+=' ok';else if(k===QZ.pick)c+=' bad';else c+=' dim'}return '<button class="'+c+'"'+(done?'':' style="animation-delay:'+(k*70)+'ms"')+' '+(done?'disabled':'onclick="qzAns('+k+')"')+'><span class="lt2">'+'ABCD'[k]+'</span><span dir="auto">'+esc(o.t)+'</span></button>'}).join('');
     if(done){const ok=q.o[QZ.pick].ok;h+='<div class="qf '+(ok?'ok':'bad')+'"><b>'+(ok?'ശരി!'+(QZ.st>=3?' +5 ബോണസ്':''):'തെറ്റ്')+'</b>'+(q.ex?'<p>'+esc(q.ex)+'</p>':'')+'</div><button class="cta" style="max-width:none" onclick="qzNext()">'+(QZ.i+1>=n?'ഫലം കാണുക':'അടുത്തത്')+'</button>'}
     return h+'</section>';
   }
   const n=QZ.qs.length,pc=QZ.sc/n,s=pc>=.9?3:pc>=.6?2:pc>=.3?1:0;
   const msg=['സാരമില്ല, പാഠം ഒന്നുകൂടി വായിച്ച് വീണ്ടും ശ്രമിക്കൂ','പഠിച്ച് വീണ്ടും ശ്രമിക്കൂ','നന്നായി! ഇനിയും മെച്ചപ്പെടുത്താം','മാഷാ അല്ലാഹ്! മികച്ച പ്രകടനം'][s];
-  h+='<div class="qr"><div class="stars">'+[1,2,3].map(x=>starI(x<=s)).join('')+'</div><h2>'+QZ.sc+' / '+n+'</h2><p class="mu">'+QZ.pts+' പോയിന്റ്</p><p>'+msg+'</p><button class="cta" style="max-width:none" onclick="qzStart()">വീണ്ടും കളിക്കൂ</button><button class="cta ghost" style="max-width:none" onclick="qzBack()">ചാപ്റ്ററുകൾ</button></div>';
+  h+='<div class="qr"><div class="stars">'+[1,2,3].map(x=>starI(x<=s)).join('')+'</div><h2><span data-cnt="'+QZ.sc+'">'+QZ.sc+'</span> / '+n+'</h2><p class="mu"><span data-cnt="'+QZ.pts+'">'+QZ.pts+'</span> പോയിന്റ്</p><p>'+msg+'</p><button class="cta" style="max-width:none" onclick="qzStart()">വീണ്ടും കളിക്കൂ</button><button class="cta ghost" style="max-width:none" onclick="qzBack()">ചാപ്റ്ററുകൾ</button></div>';
   if(QZ.wrong.length)h+='<div class="sec" style="margin-top:22px"><h3>വീണ്ടും ശ്രദ്ധിക്കാൻ</h3></div>'+QZ.wrong.map(q=>'<div class="ol"><div class="t" dir="auto">'+esc(q.q)+'<small>ശരിയുത്തരം: '+esc(q.o.find(o=>o.ok).t)+'</small></div></div>').join('');
   return h+'</section>';
 }
@@ -898,7 +898,7 @@ function quizPanel(){
   if(QA.sub)h+='<label>നിലവിലെ ചാപ്റ്ററുകൾ</label><div class="chips">'+(QA.meta||[]).map(c=>'<button class="chip'+(c===QA.ch?' on':'')+'" data-c="'+esc(c)+'" onclick="qaChip(this.dataset.c)">'+esc(c)+'</button>').join('')+'</div><label for="q_c">ചാപ്റ്റർ പേര് (പുതിയതാണെങ്കിൽ ടൈപ്പ് ചെയ്യൂ, ഉദാ. അദ്ധ്യായം 1)</label><input id="q_c" value="'+esc(QA.ch)+'" onchange="qaSel(0)">';
   h+='</div>';
   if(!QA.sub||!QA.ch)return h;
-  if(QA.qs===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div>';
+  if(QA.qs===null)return h+'<div class="sk"><i></i><i></i><i></i></div>';
   const e=QA.ed?(QA.qs.find(x=>x._id===QA.ed)||{}):{},o=e.o||['','','',''];
   h+='<div class="adm"><div><div class="sec" style="margin-top:18px"><h3>'+QA.qs.length+' ചോദ്യങ്ങൾ</h3></div>'+(QA.qs.length?QA.qs.map(x=>'<div class="ol"><div class="t" dir="auto">'+esc(x.q)+'<small>ശരിയുത്തരം: '+esc((x.o||[])[x.a]||'')+'</small></div><button class="pl" onclick="qaEdit(\''+x._id+'\')" aria-label="Edit">'+ico('edit')+'</button><button class="pl'+(V.cd===x._id?' dng':'')+'" onclick="delQz(\''+x._id+'\')" aria-label="Delete">'+ico('trash')+'</button></div>').join('')+'<button class="cta ghost" style="max-width:none" onclick="delCh()">'+(V.cd==='CH'?'ഉറപ്പാണോ? ഒന്നുകൂടി അമർത്തൂ':'ഈ ചാപ്റ്റർ മുഴുവൻ ഒഴിവാക്കുക')+'</button>':'<div class="empty">ഒന്നുമില്ല. ചേർക്കൂ.</div>')+'</div>';
   h+='<div><div class="fm"><h3>'+(QA.ed?'ചോദ്യം തിരുത്തുക':'പുതിയ ചോദ്യം')+'</h3><label for="z_q">ചോദ്യം</label><textarea id="z_q" rows="3">'+esc(e.q||'')+'</textarea>'+[1,2,3,4].map(i=>'<label for="z_o'+i+'">ഓപ്ഷൻ '+'ABCD'[i-1]+'</label><input id="z_o'+i+'" value="'+esc(o[i-1]||'')+'">').join('')+'<label for="z_a">ശരിയുത്തരം</label><select id="z_a">'+[0,1,2,3].map(i=>'<option value="'+i+'"'+(i===e.a?' selected':'')+'>'+'ABCD'[i]+'</option>').join('')+'</select><label for="z_x">വിശദീകരണം (ഓപ്ഷണൽ)</label><textarea id="z_x" rows="2">'+esc(e.ex||'')+'</textarea><button class="cta" onclick="saveQz()">'+(QA.ed?'മാറ്റം സേവ് ചെയ്യുക':'ചേർക്കുക')+'</button>'+(QA.ed?'<button class="cta ghost" onclick="qaEdit(\'\')">റദ്ദാക്കുക</button>':'')+'</div>';
@@ -913,7 +913,7 @@ const AU=new Audio();AU.preload='none';
 let QCL=[],QAV=[],QRC='',QP={n:0};
 const fmt=s=>{s=Math.floor(s||0);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 AU.ontimeupdate=()=>{const r=$('qpr'),t=$('qpt');if(r&&AU.duration)r.value=AU.currentTime/AU.duration*100;if(t)t.textContent=fmt(AU.currentTime)+' / '+fmt(AU.duration)};
-const qBtn=()=>{const b=$('qpb');if(b)b.innerHTML=ico(AU.paused?'play2':'pause')};
+const qBtn=()=>{const b=$('qpb');if(b)b.innerHTML=ico(AU.paused?'play2':'pause');const m=document.querySelector('.mp');if(m)m.classList.toggle('playing',!AU.paused)};
 AU.onplay=qBtn;AU.onpause=qBtn;
 AU.onended=()=>qNext(1);
 async function homeData(){
@@ -930,7 +930,7 @@ function quranView(){
 }
 function miniPlayer(){
   const s=SU[QP.n-1];
-  return '<div class="mp"><div class="mpi"><b class="an2" lang="ar" dir="rtl">'+s[0]+'</b><small>'+s[1]+'</small></div><input id="qpr" type="range" min="0" max="100" step="0.1" value="'+(AU.duration?AU.currentTime/AU.duration*100:0)+'" oninput="qSeek(this.value)" aria-label="Seek"><span id="qpt" class="tm2">'+fmt(AU.currentTime)+' / '+fmt(AU.duration)+'</span><button class="pp" id="qpb" onclick="qToggle()" aria-label="Play or pause">'+ico(AU.paused?'play2':'pause')+'</button><button class="pp sm" onclick="qNext(-1)" aria-label="Previous">'+ico('skipb')+'</button><button class="pp sm" onclick="qNext(1)" aria-label="Next">'+ico('skipf')+'</button><button class="pp sm xc" onclick="qClose()" aria-label="Close">'+ico('close')+'</button></div>';
+  return '<div class="mp'+(AU.paused?'':' playing')+'"><div class="mpi"><b class="an2" lang="ar" dir="rtl">'+s[0]+'</b><small>'+s[1]+'</small><span class="eq"><i></i><i></i><i></i></span></div><input id="qpr" type="range" min="0" max="100" step="0.1" value="'+(AU.duration?AU.currentTime/AU.duration*100:0)+'" oninput="qSeek(this.value)" aria-label="Seek"><span id="qpt" class="tm2">'+fmt(AU.currentTime)+' / '+fmt(AU.duration)+'</span><button class="pp" id="qpb" onclick="qToggle()" aria-label="Play or pause">'+ico(AU.paused?'play2':'pause')+'</button><button class="pp sm" onclick="qNext(-1)" aria-label="Previous">'+ico('skipb')+'</button><button class="pp sm" onclick="qNext(1)" aria-label="Next">'+ico('skipf')+'</button><button class="pp sm xc" onclick="qClose()" aria-label="Close">'+ico('close')+'</button></div>';
 }
 function setMedia(n){
   try{
@@ -1083,7 +1083,7 @@ function ytCard(x){
 }
 function ytView(){
   let h='<section class="scr"><div class="bar"><button onclick="ytBack()" aria-label="Back">'+ico('back')+'</button><span>'+T.yt[1]+'</span><span style="width:44px"></span></div>';
-  if(LST===null)return h+'<div class="empty">ലോഡ് ചെയ്യുന്നു…</div></section>';
+  if(LST===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
   if(!LST.length)return h+'<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div></section>';
   const cur=YT.cur?LST.find(x=>x._id===YT.cur):null;
   if(cur){
@@ -1099,6 +1099,28 @@ function ytView(){
 /* ---------- shell ---------- */
 
 function navh(){return '<nav><div class="brand"><img src="icon-192.png" alt=""><b>Thamheed Academy</b></div>'+(me?'<button class="'+(V.s!=='admin'&&V.s!=='set'?'on':'')+'" onclick="go(\'home\')">'+ico('home')+'<span>Home</span></button>':'')+(adm?'<button class="'+(V.s==='set'?'on':'')+'" onclick="go(\'set\')">'+ico('sliders')+'<span>Settings</span></button>':'')+(adm?'<button class="'+(V.s==='admin'?'on':'')+'" onclick="go(\'admin\')">'+ico('shield')+'<span>Admin</span></button>':'')+'<button onclick="out()">'+ico('out')+'<span>Exit</span></button></nav>'}
+const RM=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}};
+function confetti(){
+  const c=document.createElement('div');c.className='cf';c.setAttribute('aria-hidden','true');
+  const cols=['#8fd100','#f2b705','#e0574d','#625d80','#2f9bff'];
+  for(let i=0;i<30;i++){
+    const p=document.createElement('i');
+    p.style.left=(Math.random()*100)+'%';p.style.background=cols[i%cols.length];
+    p.style.animationDelay=(Math.random()*.7)+'s';p.style.animationDuration=(1.7+Math.random()*1.3)+'s';
+    c.appendChild(p);
+  }
+  document.body.appendChild(c);setTimeout(()=>c.remove(),3800);
+}
+function anim(){
+  if(RM())return;
+  document.querySelectorAll('[data-cnt]').forEach(el=>{
+    const to=+el.getAttribute('data-cnt');if(!to)return;
+    const t0=performance.now(),d=750;
+    const f=t=>{const p=Math.min(1,(t-t0)/d);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)};
+    el.textContent='0';requestAnimationFrame(f);
+  });
+  if(V.s==='quiz'&&QZ.step==='res'&&!QZ.cf){QZ.cf=1;if(QZ.qs&&QZ.qs.length&&QZ.sc/QZ.qs.length>=.9)confetti()}
+}
 function render(){
   if((V.s==='home'||V.s==='list'||V.s==='mp'||V.s==='lib'||V.s==='quiz'||V.s==='quran')&&!me)V.s='login';
   if(V.s==='admin'&&!adm)V.s='login';
@@ -1106,8 +1128,10 @@ function render(){
   const s=V.s;
   const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='lib'?libView():s==='quiz'?quizView():s==='quran'?quranView():s==='set'?setView():s==='admin'?admin():'<section class="scr hero"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
   const nav=s==='home'||s==='list'||s==='mp'||s==='lib'||s==='quiz'||s==='quran'||s==='set'||s==='admin';
-  $('app').innerHTML='<div class="app'+(nav?' hn':'')+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
-  car();
+  const key=s+':'+V.k+':'+(s==='quiz'?QZ.step:'')+(s==='mp'?MP.step:'')+(s==='lib'?LB.step:'')+(s==='admin'?V.sec:'');
+  const an=key!==LK;LK=key;
+  $('app').innerHTML='<div class="app'+(nav?' hn':'')+(an?' anim':'')+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
+  car();anim();
 }
 Object.assign(window,{ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
 
