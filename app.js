@@ -1198,12 +1198,62 @@ function studyView(){
 }
 function meView(){
   const ini=String(me.name||'?').trim().charAt(0).toUpperCase();
+  
+  // ഫോട്ടോ ഉണ്ടെങ്കിൽ ഇമേജ് കാണിക്കുക, ഇല്ലെങ്കിൽ ആദ്യ അക്ഷരം കാണിക്കുക
+  const avatarHtml = me.photo 
+    ? '<img src="'+me.photo+'" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">' 
+    : esc(ini);
+    
   const row=(ic,t,s,act,cl)=>'<button class="ol rowb'+(cl?' '+cl:'')+'" onclick="'+act+'"><div class="n">'+ico(ic)+'</div><div class="t">'+t+(s?'<small>'+s+'</small>':'')+'</div>'+(cl?'':ico('right'))+'</button>';
-  return '<section class="scr">'+instHelp()+'<div class="mecard"><div class="av">'+esc(ini)+'</div><div><b>'+esc(me.name)+'</b><small>ക്ലാസ് '+esc(me.cls)+'</small></div></div>'
+  
+  return '<section class="scr">'+instHelp()
+    +'<div class="mecard" style="display:flex; align-items:center; gap:16px;">'
+      +'<div style="position:relative; cursor:pointer;" onclick="document.getElementById(\'photo-input\').click()">'
+        +'<div class="av" style="width:64px; height:64px; font-size:26px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#8fd100; color:#fff; border-radius:50%;">'
+          +avatarHtml
+          +'<div style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.6); color:#fff; text-align:center; font-size:9px; padding:3px 0; font-weight:bold;">📷 മാറ്റുക</div>'
+        +'</div>'
+        +'<input type="file" id="photo-input" accept="image/*" style="display:none" onchange="uploadPhoto(event)">'
+      +'</div>'
+      +'<div style="flex:1;">'
+        +'<b style="font-size:18px;">'+esc(me.name)+'</b><br>'
+        +'<small style="color:#666;">ക്ലാസ് '+esc(me.cls)+'</small><br>'
+        +(me.photo ? '<button class="more" style="margin-top:6px; padding:4px 8px; font-size:11px;" onclick="removePhoto()">ഫോട്ടോ ഒഴിവാക്കുക</button>' : '')
+      +'</div>'
+    +'</div>'
     +row('check','ഹാജർ','മാസം തിരിച്ചുള്ള കലണ്ടർ',"openList('att')")
     +(isStandalone()?'':row('dl','ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യൂ','ഹോം സ്ക്രീനിൽ ഐക്കൺ ചേർക്കാൻ',"doInstall()"))
     +row('out',MEF?'ഉറപ്പാണോ? ഒരിക്കൽ കൂടി അമർത്തൂ':'Exit (ലോഗൗട്ട്)','വീണ്ടും Student ID നൽകേണ്ടി വരും',"meOut()",'dng')
     +'</section>';
+}
+async function uploadPhoto(e){
+  const file = e.target.files && e.target.files[0];
+  e.target.value = ''; // റീസെറ്റ് ചെയ്യാൻ
+  if(!file) return;
+  
+  toast('ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുന്നു...');
+  try {
+    const base64 = await resizeImage(file, 200); // ചിത്രം 200px വലിപ്പത്തിൽ ചെറുതാക്കുന്നു
+    await tmo(updateDoc(doc(db, 'students', me.id), { photo: base64 }));
+    me.photo = base64; // ലോക്കൽ സ്റ്റേറ്റ് അപ്ഡേറ്റ് ചെയ്യുന്നു
+    render();
+    toast('ഫോട്ടോ മാറ്റി ✓');
+  } catch (err) {
+    console.error(err);
+    toast('ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല');
+  }
+}
+
+async function removePhoto(){
+  if(!confirm('ഫോട്ടോ ഒഴിവാക്കണോ?')) return;
+  try {
+    await tmo(updateDoc(doc(db, 'students', me.id), { photo: null }));
+    delete me.photo;
+    render();
+    toast('ഫോട്ടോ ഒഴിവാക്കി ✓');
+  } catch (err) {
+    toast('ഒഴിവാക്കാൻ കഴിഞ്ഞില്ല');
+  }
 }
 function navh(){
   const s=V.s,k=V.k,nb=(AN||[]).filter(x=>x.imp==='Yes'||(x.ts&&Date.now()-x.ts<3*864e5)).length;
@@ -1253,7 +1303,7 @@ function render(){
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+(an?' anim':'')+' ph'+PH+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
   car();anim();
 }
-Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu});
+Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu,uploadPhoto,removePhoto});
 
 async function boot(){
   render();
