@@ -1228,19 +1228,21 @@ function meView(){
 }
 async function uploadPhoto(e){
   const file = e.target.files && e.target.files[0];
-  e.target.value = ''; // റീസെറ്റ് ചെയ്യാൻ
+  e.target.value = ''; 
   if(!file) return;
   
   toast('ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുന്നു...');
   try {
-    const base64 = await resizeImage(file, 200); // ചിത്രം 200px വലിപ്പത്തിൽ ചെറുതാക്കുന്നു
-    await tmo(updateDoc(doc(db, 'students', me.id), { photo: base64 }));
-    me.photo = base64; // ലോക്കൽ സ്റ്റേറ്റ് അപ്ഡേറ്റ് ചെയ്യുന്നു
+    const base64 = await resizeImage(file, 200);
+    // updateDoc-ന് പകരം setDoc merge:true ഉപയോഗിക്കുന്നത് സുരക്ഷിതമാണ്
+    await tmo(setDoc(doc(db, 'students', me.id), { photo: base64 }, { merge: true }));
+    me.photo = base64; 
     render();
     toast('ഫോട്ടോ മാറ്റി ✓');
   } catch (err) {
     console.error(err);
-    toast('ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല');
+    // errMsg ഉപയോഗിച്ചാൽ യഥാർത്ഥ എറർ (ഉദാ: permission-denied) കാണാം
+    toast(errMsg(err, 'ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല'));
   }
 }
 
