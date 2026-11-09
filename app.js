@@ -771,10 +771,44 @@ function qzStart(){
   QZ.qs=shuf(QZ.all).slice(0,10).map(q=>({q:q.q,ex:q.ex||'',o:shuf(q.o.map((t,i)=>({t,ok:i===q.a})))}));
   QZ.i=0;QZ.sc=0;QZ.pts=0;QZ.st=0;QZ.pick=-1;QZ.wrong=[];QZ.step='play';render();window.scrollTo(0,0);
 }
+
+/* ===== NEW: quiz sound effects (Web Audio) ===== */
+let AC=null;
+function sfx(ok){
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    const t=AC.currentTime;
+    if(ok){
+      [880,1320].forEach((f,i)=>{
+        const o=AC.createOscillator(),g=AC.createGain();
+        o.type='sine';o.frequency.value=f;
+        o.connect(g);g.connect(AC.destination);
+        const st=t+i*0.09;
+        g.gain.setValueAtTime(0.0001,st);
+        g.gain.linearRampToValueAtTime(0.22,st+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001,st+0.28);
+        o.start(st);o.stop(st+0.3);
+      });
+    }else{
+      const o=AC.createOscillator(),g=AC.createGain();
+      o.type='sawtooth';
+      o.frequency.setValueAtTime(180,t);
+      o.frequency.linearRampToValueAtTime(110,t+0.25);
+      o.connect(g);g.connect(AC.destination);
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.linearRampToValueAtTime(0.16,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.3);
+      o.start(t);o.stop(t+0.32);
+    }
+  }catch(e){}
+}
+
 function qzAns(k){
   if(QZ.pick>=0)return;
   const q=QZ.qs[QZ.i];QZ.pick=k;
-  if(q.o[k].ok){QZ.sc++;QZ.st++;QZ.pts+=10+(QZ.st>=3?5:0)}else{QZ.st=0;QZ.wrong.push(q)}
+  if(q.o[k].ok){QZ.sc++;QZ.st++;QZ.pts+=10+(QZ.st>=3?5:0);sfx(true)}
+  else{QZ.st=0;QZ.wrong.push(q);sfx(false)}
   render();
 }
 function qzNext(){
@@ -1061,6 +1095,27 @@ function setView(){
   return h+'</section>';
 }
 applySet();
+
+/* ===== NEW: unified tile color (all tiles share one color that changes together) ===== */
+(function(){
+  if(document.getElementById('ta-tile-style'))return;
+  const st=document.createElement('style');st.id='ta-tile-style';
+  st.textContent=`
+  :root{--tile:#7c5cff}
+  .grid .cc .ic,.cc .ic,.sj .ic{background:var(--tile)!important;color:#fff!important;transition:background .7s ease}
+  .sr .no{background:var(--tile)!important;color:#fff!important;transition:background .7s ease}
+  .sr.on{border-color:var(--tile)!important}
+  .scr>.top,.scr>.bar,.scr>.ah{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  @media (prefers-color-scheme:dark){html:not([data-theme="light"]) .scr>.top,html:not([data-theme="light"]) .scr>.bar,html:not([data-theme="light"]) .scr>.ah{background:rgba(17,19,24,.9)}}
+  html[data-theme="dark"] .scr>.top,html[data-theme="dark"] .scr>.bar,html[data-theme="dark"] .scr>.ah{background:rgba(17,19,24,.9)}
+  html[data-theme="light"] .scr>.top,html[data-theme="light"] .scr>.bar,html[data-theme="light"] .scr>.ah{background:rgba(255,255,255,.9)}
+  `;
+  document.head.appendChild(st);
+})();
+const TILE_COLORS=['#7c5cff','#2f9bff','#12b886','#f2b705','#e0574d','#8e44ad','#0ea5e9'];
+let TIC=0;
+document.documentElement.style.setProperty('--tile',TILE_COLORS[0]);
+setInterval(()=>{TIC=(TIC+1)%TILE_COLORS.length;document.documentElement.style.setProperty('--tile',TILE_COLORS[TIC])},8000);
 
 /* ---------- YouTube videos ---------- */
 function ytId(u){
