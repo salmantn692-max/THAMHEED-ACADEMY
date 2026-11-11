@@ -26,6 +26,7 @@ const EX={q:['QUARTERLY EXAM','Quarterly Question Paper','clip'],h:['HALF YEARLY
 let MP={step:'sub',sub:'',paper:''},SUBS=null,PAP=null,TF=null;const PB={},TFU={};
 let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},SL=[],LV=[],AN=null,LST=null,PI=null,PK='',tp=0,tmr,CI,unsub=[];
 let W={m:'c',c:'1',i:0,t:'',r:false};
+window.IS_POPPING = false; // 👈 ബാക്ക് ബട്ടൺ വേരിയബിൾ
 const A=k=>DA[k]||[];
 const IC={
 user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
@@ -65,7 +66,7 @@ skipb:'<path d="M19 4L9 12l10 8z"/><path d="M5 5v14"/>'
 const ico=n=>'<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(IC[n]||'')+'</svg>';
 
 function toast(m){const e=$('toast');if(!e)return;e.textContent=m;e.classList.add('on');clearTimeout(tmr);tmr=setTimeout(()=>e.classList.remove('on'),2400)}
-window.IS_POPPING = false; //;
+let HT=0,LK='',BK='home',PH=0;
 async function refreshHome(){
   HT=Date.now();
   try{await homeData()}catch(e){}
@@ -1238,20 +1239,26 @@ function render(){
   const nav=s==='home'||s==='list'||s==='mp'||s==='lib'||s==='quiz'||s==='quran'||s==='study'||s==='me'||s==='set'||s==='admin';
   const key=s+':'+V.k+':'+(s==='quiz'?QZ.step:'')+(s==='mp'?MP.step:'')+(s==='lib'?LB.step:'')+(s==='admin'?V.sec:'');
   const an=key!==LK;LK=key;if(an)PH=(PH+1)%3;
+
+  // 👇 ബാക്ക് ബട്ടൺ സ്റ്റെപ്പ് 2 👇
   if(an && !window.IS_POPPING && s!=='boot') {
-  try { history.pushState({ key: key }, ''); } catch(e) {}
-}
+    try { history.pushState({ key: key }, ''); } catch(e) {}
+  }
+  // 👆 ബാക്ക് ബട്ടൺ സ്റ്റെപ്പ് 2 👆
+
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+(an?' anim':'')+' ph'+PH+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
   car();anim();
 }
 
 Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu,uploadPhoto,removePhoto});
+
+// 👇 ബാക്ക് ബട്ടൺ സ്റ്റെപ്പ് 3 👇
 window.addEventListener('popstate', function(e) {
-  window.IS_POPPING = true; // ബാക്ക് ബട്ടൺ ആണെന്ന് മാർക്ക് ചെയ്യുന്നു
+  window.IS_POPPING = true; 
   
   if (V.s === 'home' || V.s === 'login' || V.s === 'splash' || V.s === 'adminlogin' || V.s === 'admin') {
     window.IS_POPPING = false;
-    return; // ഹോം പേജിൽ ആണെങ്കിൽ ആപ്പ് ക്ലോസ് ആകാൻ അനുവദിക്കുന്നു
+    return; 
   }
   
   if (V.s === 'quiz') qzBack();
@@ -1263,6 +1270,8 @@ window.addEventListener('popstate', function(e) {
   
   setTimeout(() => { window.IS_POPPING = false; }, 50);
 });
+// 👆 ബാക്ക് ബട്ടൺ സ്റ്റെപ്പ് 3 👆
+
 async function boot(){
   render();
   const u=await tmo(new Promise(r=>{const f=onAuthStateChanged(auth,x=>{f();r(x)})}),8000).catch(()=>null);
