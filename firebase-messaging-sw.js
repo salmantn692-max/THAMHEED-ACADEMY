@@ -6,8 +6,8 @@ const firebaseConfig = {
   apiKey: "AIzaSyCj9nmC3tUfgRefQJeG_SQWr9LCPNZHH7M",
   authDomain: "thamheed-academy-a9bc5.firebaseapp.com",
   projectId: "thamheed-academy-a9bc5",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
+  storageBucket: "thamheed-academy-a9bc5.firebasestorage.app",
+  messagingSenderId: "841576155690",
   appId: "1:841576155690:web:d33c0988b313c755c0d153"
 };
 
