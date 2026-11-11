@@ -5,7 +5,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-com
 const firebaseConfig = {
   apiKey: "AIzaSyCj9nmC3tUfgRefQJeG_SQWr9LCPNZHH7M",
   authDomain: "thamheed-academy-a9bc5.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
+  projectId: "thamheed-academy-a9bc5",
   storageBucket: "YOUR_PROJECT_ID.appspot.com",
   messagingSenderId: "YOUR_SENDER_ID",
   appId: "YOUR_APP_ID"
