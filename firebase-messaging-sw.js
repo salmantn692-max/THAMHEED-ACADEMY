@@ -3,7 +3,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-com
 
 // ⚠️ ഇവിടെ നിങ്ങളുടെ ഫയർബേസ് വിവരങ്ങൾ നൽകുക
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyCj9nmC3tUfgRefQJeG_SQWr9LCPNZHH7M",
   authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
   projectId: "YOUR_PROJECT_ID",
   storageBucket: "YOUR_PROJECT_ID.appspot.com",
