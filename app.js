@@ -1,7 +1,6 @@
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,signInAnonymously,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {initializeFirestore,collection,doc,getDoc,getDocs,setDoc,addDoc,updateDoc,deleteDoc,query,where,onSnapshot,writeBatch,arrayUnion,arrayRemove} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import {getMessaging, getToken, onMessage} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js";
 import {firebaseConfig,ADMIN_EMAILS} from "./firebase-config.js";
 
 const fb=initializeApp(firebaseConfig),auth=getAuth(fb),db=initializeFirestore(fb,{experimentalAutoDetectLongPolling:true},'default');
@@ -1245,29 +1244,6 @@ function render(){
 
 Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu,uploadPhoto,removePhoto});
 
-/* ---------- Push Notifications ---------- */
-const VAPID_KEY = "YOUR_VAPID_KEY_HERE"; // ⚠️ ഇവിടെ നിങ്ങളുടെ VAPID Key നൽകുക
-
-async function setupNotifications() {
-  if (!('Notification' in window)) return;
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      const messaging = getMessaging(fb);
-      const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-      if (token) {
-        await setDoc(doc(db, 'students', me.id), { fcmToken: token }, { merge: true });
-        console.log('FCM Token Saved:', token);
-      }
-      onMessage(messaging, (payload) => {
-        toast(`🔔 ${payload.notification.title}: ${payload.notification.body}`);
-      });
-    }
-  } catch (error) {
-    console.error('Notification setup failed:', error);
-  }
-}
-
 async function boot(){
   render();
   const u=await tmo(new Promise(r=>{const f=onAuthStateChanged(auth,x=>{f();r(x)})}),8000).catch(()=>null);
@@ -1281,38 +1257,9 @@ async function boot(){
       }
     }catch(e){console.error(e)}
   }
-  if(me){ 
-    await loadHome(); 
-    async function setupNotifications() {
-  if (!('Notification' in window)) {
-    alert('ഈ ബ്രൗസറിൽ നോട്ടിഫിക്കേഷൻ സപ്പോർട്ട് ചെയ്യുന്നില്ല.');
-    return;
-  }
-  
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      const messaging = getMessaging(fb);
-      
-      // ഇവിടെയാണ് ടോക്കൺ എടുക്കുന്നത്
-      const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-      
-      if (token) {
-        await setDoc(doc(db, 'students', me.id), { fcmToken: token }, { merge: true });
-        alert('നോട്ടിഫിക്കേഷൻ ടോക്കൺ ലഭിച്ചു! ✓');
-      } else {
-        alert('ടോക്കൺ ലഭിച്ചില്ല. VAPID Key പരിശോധിക്കുക.');
-      }
-      
-      onMessage(messaging, (payload) => {
-        toast(`🔔 ${payload.notification.title}: ${payload.notification.body}`);
-      });
-    } else {
-      alert('നോട്ടിഫിക്കേഷൻ പെർമിഷൻ നിഷേധിച്ചു. സെറ്റിംഗ്സിൽ പോയി Allow ചെയ്യുക.');
-    }
-  } catch (error) {
-    console.error('Notification setup failed:', error);
-    // എറർ എന്താണെന്ന് കൃത്യമായി കാണാൻ ഇത് ഉപയോഗിക്കുന്നു
-    alert('Error: ' + (error.message || error.code || 'Unknown error'));
-  }
-    }
+  if(me){await loadHome();return}
+  if(adm&&location.hash!=='#admin'){go('admin');return}
+  go(location.hash==='#admin'?(adm?'admin':'adminlogin'):'splash');
+}
+boot();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
