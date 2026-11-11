@@ -1301,7 +1301,18 @@ function render(){
   const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='lib'?libView():s==='quiz'?quizView():s==='quran'?quranView():s==='study'?studyView():s==='me'?meView():s==='set'?setView():s==='admin'?admin():'<section class="scr hero"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
   const nav=s==='home'||s==='list'||s==='mp'||s==='lib'||s==='quiz'||s==='quran'||s==='study'||s==='me'||s==='set'||s==='admin';
   const key=s+':'+V.k+':'+(s==='quiz'?QZ.step:'')+(s==='mp'?MP.step:'')+(s==='lib'?LB.step:'')+(s==='admin'?V.sec:'');
-  const an=key!==LK;LK=key;if(an)PH=(PH+1)%3;
+  
+  const an=key!==LK;
+  LK=key;
+  
+  if(an){
+    PH=(PH+1)%3;
+    // പേജ് മാറുമ്പോൾ ഹിസ്റ്ററിയിൽ സേവ് ചെയ്യുന്നു
+    if(!window.IS_BACK_BTN) { 
+      try { history.pushState({ key: key }, ''); } catch(e) {} 
+    }
+  }
+  
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+(an?' anim':'')+' ph'+PH+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
   car();anim();
 }
@@ -1319,9 +1330,26 @@ window.addEventListener('popstate', function(e) {
   }
 });
 
-async function boot(){
-  try { history.pushState({ app: true }, ''); } catch(e) {}
+// ബാക്ക് ബട്ടൺ അമർത്തുമ്പോൾ പ്രവർത്തിക്കാൻ
+window.addEventListener('popstate', function(e) {
+  window.IS_BACK_BTN = true; // render() ഹിസ്റ്ററി സേവ് ചെയ്യാതിരിക്കാൻ
   
+  if (V.s === 'splash' || V.s === 'login' || V.s === 'adminlogin' || V.s === 'home' || V.s === 'admin') {
+    window.IS_BACK_BTN = false;
+    return; // ഹോം പേജിൽ ആണെങ്കിൽ ആപ്പ് ക്ലോസ് ആകട്ടെ
+  }
+  
+  if (V.s === 'quiz') qzBack();
+  else if (V.s === 'mp') mpBack();
+  else if (V.s === 'lib') libBack();
+  else if (V.s === 'list' && V.k === 'yt') ytBack();
+  else if (V.s === 'study' || V.s === 'me' || V.s === 'quran' || V.s === 'set') go('home');
+  else goBack();
+  
+  window.IS_BACK_BTN = false;
+});
+
+async function boot(){
   render();
   const u=await tmo(new Promise(r=>{const f=onAuthStateChanged(auth,x=>{f();r(x)})}),8000).catch(()=>null);
   if(u&&!u.isAnonymous&&isAdm(u.email)){adm=true;watch()}
