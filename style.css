@@ -109,8 +109,8 @@ nav .brand{display:none}
 nav button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);padding:6px 22px;position:relative;font-weight:500}
 nav button.on{color:var(--text)}
 nav button.on::after{content:"";position:absolute;top:-9px;left:28%;right:28%;height:3px;border-radius:3px;background:var(--g)}
-.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#262a54;color:#fff;padding:12px 20px;border-radius:14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:5;max-width:90%;text-align:center}
-.toast.on{opacity:1}
+.toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,14px);background:#262a54;color:#fff;padding:12px 20px;border-radius:14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .25s;z-index:5;max-width:90%;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 /* Desktop */
@@ -301,3 +301,170 @@ html[data-fs="xl"] #app{zoom:1.25}
 .yc .ytt{display:block;padding:12px 14px;font-weight:600;font-size:15px;line-height:1.4;overflow-wrap:anywhere}
 .th.yt{width:72px;height:40px;border-radius:8px;object-fit:cover}
 @media (min-width:900px){.ygrid{grid-template-columns:repeat(3,1fr)}}
+
+/* ===== Animations (balanced) ===== */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.88)}60%{transform:scale(1.03)}100%{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes shim{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@keyframes float{50%{transform:translateY(-6px)}}
+@keyframes eqb{0%,100%{height:3px}50%{height:14px}}
+@keyframes starpop{0%{opacity:0;transform:scale(.2) rotate(-40deg)}70%{transform:scale(1.25) rotate(8deg)}100%{opacity:1;transform:none}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(224,87,77,.35)}50%{box-shadow:0 0 0 7px rgba(224,87,77,0)}}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+/* screen entrance (only when the screen changes) */
+.app.anim .scr{animation:fadein .25s ease backwards}
+.app.anim .scr>*:not(.grid){animation:rise .45s ease backwards}
+.app.anim .grid>*{animation:pop .45s ease backwards}
+.app.anim .cal i{animation:pop .35s ease backwards}
+.hero .logo img{animation:float 5s ease-in-out infinite}
+
+/* press and hover feedback */
+.cc,.px,.yc,.ol,.cta,.chip,.qo,.sr,.sc,.pl,.pab,.bar button,nav button,.pp{transition:transform .15s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease}
+.cc:active,.px:active,.yc:active,.cta:active,.chip:active,.qo:not(:disabled):active,.sr:active,.sc:active,.pl:active,.pp:active{transform:scale(.97)}
+@media (hover:hover){.cc:not([disabled]):hover,.px:hover,.yc:hover,.sr:hover,.sc:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(38,42,84,.12)}}
+
+/* quiz */
+.qc.fresh{animation:rise .4s ease backwards}
+.qo.in{animation:rise .35s ease backwards}
+.qo.ok{animation:pop .45s ease}
+.qo.bad{animation:shake .45s ease}
+.qf{animation:rise .3s ease backwards}
+.qr .stars svg.on{animation:starpop .6s ease backwards}
+.qr .stars svg:nth-child(1){animation-delay:.2s}
+.qr .stars svg:nth-child(2){animation-delay:.6s}
+.qr .stars svg:nth-child(3){animation-delay:1s}
+.cf{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:20}
+.cf i{position:absolute;top:-16px;width:9px;height:14px;border-radius:2px;animation:fall 2s linear forwards}
+
+/* Quran player equalizer */
+.eq{display:inline-flex;align-items:flex-end;gap:2px;height:14px;margin-left:8px;vertical-align:middle;opacity:0;transition:opacity .2s}
+.mp.playing .eq{opacity:1}
+.eq i{width:3px;height:3px;background:var(--g2);border-radius:2px}
+.mp.playing .eq i{animation:eqb .9s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.2s}
+.eq i:nth-child(3){animation-delay:.4s}
+
+/* loading skeleton */
+.sk i{display:block;height:68px;border-radius:18px;margin-bottom:12px;background:linear-gradient(90deg,var(--soft) 30%,var(--line) 50%,var(--soft) 70%);background-size:300% 100%;animation:shim 1.4s linear infinite}
+.sk i:nth-child(2){opacity:.8}
+.sk i:nth-child(3){opacity:.6}
+
+/* attention: important notice */
+.nt.imp{animation:glow 2.4s ease-in-out infinite}
+.app.anim .scr>*:nth-child(1){animation-delay:45ms}
+.app.anim .scr>*:nth-child(2){animation-delay:90ms}
+.app.anim .scr>*:nth-child(3){animation-delay:135ms}
+.app.anim .scr>*:nth-child(4){animation-delay:180ms}
+.app.anim .scr>*:nth-child(5){animation-delay:225ms}
+.app.anim .scr>*:nth-child(6){animation-delay:270ms}
+.app.anim .scr>*:nth-child(7){animation-delay:315ms}
+.app.anim .scr>*:nth-child(8){animation-delay:360ms}
+.app.anim .scr>*:nth-child(9){animation-delay:405ms}
+.app.anim .scr>*:nth-child(10){animation-delay:450ms}
+.app.anim .scr>*:nth-child(11){animation-delay:495ms}
+.app.anim .scr>*:nth-child(12){animation-delay:540ms}
+.app.anim .grid>*:nth-child(1){animation-delay:175ms}
+.app.anim .grid>*:nth-child(2){animation-delay:230ms}
+.app.anim .grid>*:nth-child(3){animation-delay:285ms}
+.app.anim .grid>*:nth-child(4){animation-delay:340ms}
+.app.anim .grid>*:nth-child(5){animation-delay:395ms}
+.app.anim .grid>*:nth-child(6){animation-delay:450ms}
+.app.anim .grid>*:nth-child(7){animation-delay:505ms}
+.app.anim .grid>*:nth-child(8){animation-delay:560ms}
+.app.anim .grid>*:nth-child(9){animation-delay:615ms}
+.app.anim .grid>*:nth-child(10){animation-delay:670ms}
+.app.anim .grid>*:nth-child(11){animation-delay:725ms}
+.app.anim .grid>*:nth-child(12){animation-delay:780ms}
+.app.anim .grid>*:nth-child(13){animation-delay:835ms}
+.app.anim .grid>*:nth-child(14){animation-delay:890ms}
+.app.anim .cal i:nth-child(1){animation-delay:12ms}
+.app.anim .cal i:nth-child(2){animation-delay:24ms}
+.app.anim .cal i:nth-child(3){animation-delay:36ms}
+.app.anim .cal i:nth-child(4){animation-delay:48ms}
+.app.anim .cal i:nth-child(5){animation-delay:60ms}
+.app.anim .cal i:nth-child(6){animation-delay:72ms}
+.app.anim .cal i:nth-child(7){animation-delay:84ms}
+.app.anim .cal i:nth-child(8){animation-delay:96ms}
+.app.anim .cal i:nth-child(9){animation-delay:108ms}
+.app.anim .cal i:nth-child(10){animation-delay:120ms}
+.app.anim .cal i:nth-child(11){animation-delay:132ms}
+.app.anim .cal i:nth-child(12){animation-delay:144ms}
+.app.anim .cal i:nth-child(13){animation-delay:156ms}
+.app.anim .cal i:nth-child(14){animation-delay:168ms}
+.app.anim .cal i:nth-child(15){animation-delay:180ms}
+.app.anim .cal i:nth-child(16){animation-delay:192ms}
+.app.anim .cal i:nth-child(17){animation-delay:204ms}
+.app.anim .cal i:nth-child(18){animation-delay:216ms}
+.app.anim .cal i:nth-child(19){animation-delay:228ms}
+.app.anim .cal i:nth-child(20){animation-delay:240ms}
+.app.anim .cal i:nth-child(21){animation-delay:252ms}
+.app.anim .cal i:nth-child(22){animation-delay:264ms}
+.app.anim .cal i:nth-child(23){animation-delay:276ms}
+.app.anim .cal i:nth-child(24){animation-delay:288ms}
+.app.anim .cal i:nth-child(25){animation-delay:300ms}
+.app.anim .cal i:nth-child(26){animation-delay:312ms}
+.app.anim .cal i:nth-child(27){animation-delay:324ms}
+.app.anim .cal i:nth-child(28){animation-delay:336ms}
+.app.anim .cal i:nth-child(29){animation-delay:348ms}
+.app.anim .cal i:nth-child(30){animation-delay:360ms}
+.app.anim .cal i:nth-child(31){animation-delay:372ms}
+.app.anim .cal i:nth-child(32){animation-delay:384ms}
+.app.anim .cal i:nth-child(33){animation-delay:396ms}
+.app.anim .cal i:nth-child(34){animation-delay:408ms}
+.app.anim .cal i:nth-child(35){animation-delay:420ms}
+.app.anim .cal i:nth-child(36){animation-delay:432ms}
+.app.anim .cal i:nth-child(37){animation-delay:444ms}
+.app.anim .cal i:nth-child(38){animation-delay:456ms}
+.app.anim .cal i:nth-child(39){animation-delay:468ms}
+.app.anim .cal i:nth-child(40){animation-delay:480ms}
+.app.anim .cal i:nth-child(41){animation-delay:492ms}
+.app.anim .cal i:nth-child(42){animation-delay:504ms}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Bottom bar: study / me */
+@media (max-width:899px){nav button{flex:1;padding:6px 4px;min-width:0}}
+@media (min-width:900px){nav button{flex:none}nav button .bdg{right:12px;top:50%;transform:translateY(-50%)}}
+nav button .bdg{position:absolute;top:0;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#e0574d;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;line-height:1}
+.cc{position:relative}
+.ld{position:absolute;top:12px;right:12px;width:11px;height:11px;border-radius:50%;background:#e0574d;animation:pulse 1.4s infinite}
+.rowb{width:100%;text-align:left;font:inherit;color:var(--text)}
+.rowb>svg.i:last-child{color:var(--muted)}
+.rowb.dng .n{background:#c0392b}
+.rowb.dng .t{color:#c0392b}
+.mecard{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:var(--sh)}
+.mecard b{display:block;font-size:20px;font-weight:600}
+.mecard small{color:var(--muted);font-size:14px}
+.av{width:64px;height:64px;border-radius:50%;background:var(--ico);color:#fff;display:grid;place-items:center;font-size:26px;font-weight:600;flex:none}
+
+/* One colour for all icon circles; it changes every time a screen opens (indigo, logo green, teal) */
+.app{--cc:#625d80}
+.app.ph1{--cc:#5c9a00}
+.app.ph2{--cc:#2a7f9e}
+.ic,.ol .n,.pbig,.av{background:var(--cc)}
+.ol.rowb.dng .n{background:#c0392b}
+
+/* Header stays in place while the page scrolls */
+.bar,.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);padding-top:8px;padding-bottom:8px}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:7}
+.qmeta .snd{width:34px;height:34px}
+
+/* Header stays fixed while the page scrolls */
+.top,.bar{position:sticky;top:0;z-index:6;background:var(--bg);margin:-20px -20px 14px;padding:20px 20px 12px}
+.rt{display:flex;align-items:center;gap:8px}
+@media (min-width:900px){.top,.bar{margin:-36px -40px 18px;padding:36px 40px 14px}}
+
+/* Icon circles: one colour for the whole screen, changing each time a screen opens or you go back */
+.app{--c1:#625d80}
+.app.ph1{--c1:#5c9a00}
+.app.ph2{--c1:#2a7f9e}
+.grid>* .ic{background:var(--c1)}
+.ol .n{background:var(--c1)}
+.ol.rowb.dng .n{background:#c0392b}
+
+/* Sticky headers: greeting row on Home and the back-button row on inner pages stay fixed while the content scrolls */
+.top,.bar{position:sticky;top:0;z-index:6;background:var(--bg);margin:calc(-20px - env(safe-area-inset-top,0px)) -20px 14px;padding:calc(20px + env(safe-area-inset-top,0px)) 20px 12px}
+.top{box-shadow:0 10px 12px -12px rgba(0,0,0,.28)}
+@media (min-width:900px){.top,.bar{margin:-36px -40px 18px;padding:36px 40px 12px}}
