@@ -1246,6 +1246,27 @@ function render(){
 Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu,uploadPhoto,removePhoto});
 
 async function boot(){
+  const VAPID_KEY = "ഇവിടെ_നിങ്ങളുടെ_VAPID_KEY_കോപ്പി_ചെയ്ത്_പേസ്റ്റ്_ചെയ്യുക";
+
+async function setupNotifications() {
+  if (!('Notification' in window)) return;
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      const messaging = getMessaging(fb);
+      const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+      if (token) {
+        // ടോക്കൺ ഫയർസ്റ്റോറിൽ സേവ് ചെയ്യുന്നു
+        await setDoc(doc(db, 'students', me.id), { fcmToken: token }, { merge: true });
+      }
+      onMessage(messaging, (payload) => {
+        toast(`🔔 ${payload.notification.title}: ${payload.notification.body}`);
+      });
+    }
+  } catch (error) {
+    console.error('Notification setup failed:', error);
+  }
+}
   render();
   const u=await tmo(new Promise(r=>{const f=onAuthStateChanged(auth,x=>{f();r(x)})}),8000).catch(()=>null);
   if(u&&!u.isAnonymous&&isAdm(u.email)){adm=true;watch()}
