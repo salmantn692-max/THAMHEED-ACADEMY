@@ -1238,12 +1238,31 @@ function render(){
   const nav=s==='home'||s==='list'||s==='mp'||s==='lib'||s==='quiz'||s==='quran'||s==='study'||s==='me'||s==='set'||s==='admin';
   const key=s+':'+V.k+':'+(s==='quiz'?QZ.step:'')+(s==='mp'?MP.step:'')+(s==='lib'?LB.step:'')+(s==='admin'?V.sec:'');
   const an=key!==LK;LK=key;if(an)PH=(PH+1)%3;
+  if(an && !window.IS_POPPING && s!=='boot') {
+  try { history.pushState({ key: key }, ''); } catch(e) {}
+}
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+(an?' anim':'')+' ph'+PH+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
   car();anim();
 }
 
 Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu,uploadPhoto,removePhoto});
-
+window.addEventListener('popstate', function(e) {
+  window.IS_POPPING = true; // ബാക്ക് ബട്ടൺ ആണെന്ന് മാർക്ക് ചെയ്യുന്നു
+  
+  if (V.s === 'home' || V.s === 'login' || V.s === 'splash' || V.s === 'adminlogin' || V.s === 'admin') {
+    window.IS_POPPING = false;
+    return; // ഹോം പേജിൽ ആണെങ്കിൽ ആപ്പ് ക്ലോസ് ആകാൻ അനുവദിക്കുന്നു
+  }
+  
+  if (V.s === 'quiz') qzBack();
+  else if (V.s === 'mp') mpBack();
+  else if (V.s === 'lib') libBack();
+  else if (V.s === 'list' && V.k === 'yt') ytBack();
+  else if (V.s === 'study' || V.s === 'me' || V.s === 'quran' || V.s === 'set') go('home');
+  else goBack();
+  
+  setTimeout(() => { window.IS_POPPING = false; }, 50);
+});
 async function boot(){
   render();
   const u=await tmo(new Promise(r=>{const f=onAuthStateChanged(auth,x=>{f();r(x)})}),8000).catch(()=>null);
