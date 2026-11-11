@@ -1283,11 +1283,36 @@ async function boot(){
   }
   if(me){ 
     await loadHome(); 
-    setupNotifications(); 
-    return; 
+    async function setupNotifications() {
+  if (!('Notification' in window)) {
+    alert('ഈ ബ്രൗസറിൽ നോട്ടിഫിക്കേഷൻ സപ്പോർട്ട് ചെയ്യുന്നില്ല.');
+    return;
   }
-  if(adm&&location.hash!=='#admin'){go('admin');return}
-  go(location.hash==='#admin'?(adm?'admin':'adminlogin'):'splash');
-}
-boot();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+  
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      const messaging = getMessaging(fb);
+      
+      // ഇവിടെയാണ് ടോക്കൺ എടുക്കുന്നത്
+      const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+      
+      if (token) {
+        await setDoc(doc(db, 'students', me.id), { fcmToken: token }, { merge: true });
+        alert('നോട്ടിഫിക്കേഷൻ ടോക്കൺ ലഭിച്ചു! ✓');
+      } else {
+        alert('ടോക്കൺ ലഭിച്ചില്ല. VAPID Key പരിശോധിക്കുക.');
+      }
+      
+      onMessage(messaging, (payload) => {
+        toast(`🔔 ${payload.notification.title}: ${payload.notification.body}`);
+      });
+    } else {
+      alert('നോട്ടിഫിക്കേഷൻ പെർമിഷൻ നിഷേധിച്ചു. സെറ്റിംഗ്സിൽ പോയി Allow ചെയ്യുക.');
+    }
+  } catch (error) {
+    console.error('Notification setup failed:', error);
+    // എറർ എന്താണെന്ന് കൃത്യമായി കാണാൻ ഇത് ഉപയോഗിക്കുന്നു
+    alert('Error: ' + (error.message || error.code || 'Unknown error'));
+  }
+    }
