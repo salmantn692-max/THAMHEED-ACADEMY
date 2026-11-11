@@ -1306,8 +1306,31 @@ function render(){
   car();anim();
 }
 Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu,uploadPhoto,removePhoto});
+// ഫോണിന്റെ ബാക്ക് ബട്ടൺ അമർത്തുമ്പോൾ എങ്ങോട്ട് പോകണം എന്ന് തീരുമാനിക്കാൻ
+window.addEventListener('popstate', function(e) {
+    // ഹോം, ലോഗിൻ പേജുകളിൽ ആണെങ്കിൽ ആപ്പ് ക്ലോസ് ആകാൻ അനുവദിക്കുക (അല്ലെങ്കിൽ പഴയ പേജിലേക്ക് പോകട്ടെ)
+    if (V.s === 'splash' || V.s === 'login' || V.s === 'adminlogin' || V.s === 'home' || V.s === 'admin') {
+        return;
+    }
 
-async function boot(){
+    // ഓരോ സ്ക്രീനിനും അനുയോജ്യമായ ബാക്ക് ഫങ്ക്ഷൻ വിളിക്കുക
+    if (V.s === 'quiz') qzBack();
+    else if (V.s === 'mp') mpBack();
+    else if (V.s === 'lib') libBack();
+    else if (V.s === 'list' && V.k === 'yt') ytBack();
+    else if (V.s === 'study' || V.s === 'me' || V.s === 'quran' || V.s === 'set') go('home');
+    else goBack(); // മറ്റെല്ലാ സ്ക്രീനുകൾക്കും ഡീഫോൾട്ട് ആയി goBack() വിളിക്കുന്നു
+
+    // ഇപ്പോഴും ഹോമിൽ അല്ലെങ്കിൽ, ആപ്പ് ക്ലോസ് ആകാതിരിക്കാൻ വീണ്ടും ഒരു ഹിസ്റ്ററി സേവ് ചെയ്യുന്നു
+    if (V.s !== 'home' && V.s !== 'admin' && V.s !== 'login' && V.s !== 'splash') {
+        try { history.pushState({ app: true }, ''); } catch(err) {}
+    }
+});
+async function boot(){async function boot(){
+  try { history.pushState({ app: true }, ''); } catch(e) {} // 👈 ഈ വരി ചേർക്കുക
+  
+  render();
+  // ... ബാക്കി ഉള്ള കോഡുകൾ ...
   render();
   const u=await tmo(new Promise(r=>{const f=onAuthStateChanged(auth,x=>{f();r(x)})}),8000).catch(()=>null);
   if(u&&!u.isAnonymous&&isAdm(u.email)){adm=true;watch()}
