@@ -1170,24 +1170,37 @@ async function removePhoto(){
 }
 function meView(){
   const ini=String(me.name||'?').trim().charAt(0).toUpperCase();
+  
+  // ഫോട്ടോ ഉണ്ടെങ്കിൽ ഇമേജ് കാണിക്കുക, ഇല്ലെങ്കിൽ ആദ്യ അക്ഷരം
   const avatarHtml = me.photo 
     ? '<img src="'+me.photo+'" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">' 
     : esc(ini);
+
+  // ഫോട്ടോയുടെ മുകളിൽ കാണിക്കുന്ന എഡിറ്റ് (പെൻസിൽ) ഐക്കൺ
+  const pencilIcon = `<div style="position:absolute; bottom:0; right:0; background:var(--g); color:#fff; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.2); border:3px solid var(--card); font-size:14px;">✏️</div>`;
+  
+  // ഫോട്ടോ ഉണ്ടെങ്കിൽ മാത്രം കാണിക്കുന്ന റിമൂവ് (✕) ഐക്കൺ
+  const trashIcon = me.photo ? `<div onclick="event.stopPropagation(); removePhoto();" style="position:absolute; top:0; right:0; background:#e0574d; color:#fff; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.2); border:3px solid var(--card); font-size:12px; font-weight:bold; z-index:2;">✕</div>` : '';
+
   const row=(ic,t,s,act,cl)=>'<button class="ol rowb'+(cl?' '+cl:'')+'" onclick="'+act+'"><div class="n">'+ico(ic)+'</div><div class="t">'+t+(s?'<small>'+s+'</small>':'')+'</div>'+(cl?'':ico('right'))+'</button>';
+  
   return '<section class="scr">'+instHelp()
-    +'<div class="mecard" style="display:flex; align-items:center; gap:16px;">'
-      +'<div style="position:relative; cursor:pointer;" onclick="document.getElementById(\'photo-input\').click()">'
-        +'<div class="av" style="width:64px; height:64px; font-size:26px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#8fd100; color:#fff; border-radius:50%;">'
+    +'<div class="mecard" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:14px; padding:28px 16px; background:var(--card); border-radius:24px; box-shadow:var(--sh); margin-bottom:20px;">'
+      
+      +'<div style="position:relative; width:100px; height:100px; cursor:pointer;" onclick="document.getElementById(\'photo-input\').click()">'
+        +'<div class="av" style="width:100%; height:100%; font-size:40px; position:relative; display:flex; align-items:center; justify-content:center; background:var(--g); color:#fff; border-radius:50%; border:3px solid var(--bg); box-shadow:0 4px 12px rgba(0,0,0,0.1);">'
           +avatarHtml
-          +'<div style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.6); color:#fff; text-align:center; font-size:9px; padding:3px 0; font-weight:bold;">📷 മാറ്റുക</div>'
         +'</div>'
+        +pencilIcon
+        +trashIcon
         +'<input type="file" id="photo-input" accept="image/*" style="display:none" onchange="uploadPhoto(event)">'
       +'</div>'
-      +'<div style="flex:1;">'
-        +'<b style="font-size:18px;">'+esc(me.name)+'</b><br>'
-        +'<small style="color:#666;">ക്ലാസ് '+esc(me.cls)+'</small><br>'
-        +(me.photo ? '<button class="more" style="margin-top:6px; padding:4px 8px; font-size:11px;" onclick="removePhoto()">ഫോട്ടോ ഒഴിവാക്കുക</button>' : '')
+      
+      +'<div>'
+        +'<b style="font-size:22px; color:var(--text); display:block; margin-bottom:6px;">'+esc(me.name)+'</b>'
+        +'<span class="tag" style="display:inline-block; font-size:14px; padding:6px 14px;">ക്ലാസ് '+esc(me.cls)+'</span>'
       +'</div>'
+      
     +'</div>'
     +row('check','ഹാജർ','മാസം തിരിച്ചുള്ള കലണ്ടർ',"openList('att')")
     +(isStandalone()?'':row('dl','ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യൂ','ഹോം സ്ക്രീനിൽ ഐക്കൺ ചേർക്കാൻ',"doInstall()"))
