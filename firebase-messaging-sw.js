@@ -8,7 +8,7 @@ const firebaseConfig = {
   projectId: "thamheed-academy-a9bc5",
   storageBucket: "YOUR_PROJECT_ID.appspot.com",
   messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  appId: "1:841576155690:web:d33c0988b313c755c0d153"
 };
 
 firebase.initializeApp(firebaseConfig);
