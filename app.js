@@ -65,7 +65,7 @@ skipb:'<path d="M19 4L9 12l10 8z"/><path d="M5 5v14"/>'
 const ico=n=>'<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(IC[n]||'')+'</svg>';
 
 function toast(m){const e=$('toast');if(!e)return;e.textContent=m;e.classList.add('on');clearTimeout(tmr);tmr=setTimeout(()=>e.classList.remove('on'),2400)}
-let HT=0,LK='',BK='home',PH=0;
+window.IS_POPPING = false; //;
 async function refreshHome(){
   HT=Date.now();
   try{await homeData()}catch(e){}
