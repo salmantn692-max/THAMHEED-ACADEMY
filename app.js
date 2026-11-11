@@ -1,4 +1,4 @@
-.import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,signInAnonymously,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {initializeFirestore,collection,doc,getDoc,getDocs,setDoc,addDoc,updateDoc,deleteDoc,query,where,onSnapshot,writeBatch,arrayUnion,arrayRemove} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {firebaseConfig,ADMIN_EMAILS} from "./firebase-config.js";
@@ -157,31 +157,6 @@ async function out(){
 function tap(){tp++;if(tp>=5){tp=0;go(adm?'admin':'adminlogin')}}
 
 /* ---------- student screens ---------- */
-function resizeImage(file, maxSize = 200) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > height) {
-          if (width > maxSize) { height = Math.round(height * (maxSize / width)); width = maxSize; }
-        } else {
-          if (height > maxSize) { width = Math.round(width * (maxSize / height)); height = maxSize; }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.8)); // Base64 String
-      };
-      img.onerror = reject;
-      img.src = e.target.result;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
 function hero(inner){return '<section class="scr hero"><div class="logo" onclick="tap()"><img src="icon-192.png" alt="Thamheed Academy logo"></div><h1>Thamheed Academy</h1>'+inner+'</section>'}
 let DIP=null,HELP=false;
 const isStandalone=()=>{try{return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}catch(e){return false}};
@@ -202,16 +177,16 @@ const login=()=>hero('<p>Academy നൽകിയ Student ID നൽകൂ</p><inp
 const adminLogin=()=>hero('<p>Admin ലോഗിൻ</p><input id="ae" type="email" placeholder="Email" autocomplete="username"><input id="ap" type="password" placeholder="Password" autocomplete="current-password"><div class="err" id="err"></div><button class="cta" onclick="doAdmin()">പ്രവേശിക്കാം</button><button class="cta ghost" onclick="go(\'login\')">← തിരികെ</button>');
 function carousel(){
   if(!SL.length)return '';
-  return '<div class="car"><div class="trk" id="trk" onscroll="dots(this)" ontouchstart="stopCar()">'+SL.map(x=>{
+  return '<div class="car"><div class="trk" id="trk" onscroll="dots(this)" ontouchstart="stopCar()" ontouchend="car()">'+SL.map(x=>{
     const u=safe(x.url),im=isimg(x.img),inner=im?'<img src="'+x.img+'" alt="'+esc(x.t)+'">':'<b>'+esc(x.t)+'</b>',cl='sl'+(im?' im':' tx');
     return u?'<a class="'+cl+'" href="'+u+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="'+cl+'">'+inner+'</div>';
   }).join('')+'</div>'+(SL.length>1?'<div class="dts" id="dts">'+SL.map((x,i)=>'<i'+(i?'':' class="on"')+'></i>').join('')+'</div>':'')+'</div>';
 }
-function dots(t){const d=$('dts');if(!d)return;const i=Math.round(t.scrollLeft/t.clientWidth);[...d.children].forEach((c,j)=>c.className=j===i?'on':'')}
+function dots(t){const d=$('dts');if(!d)return;const w=t.clientWidth;if(w===0)return;const i=Math.round(t.scrollLeft/w);[...d.children].forEach((c,j)=>c.className=j===i?'on':'')}
 function stopCar(){clearInterval(CI)}
 function car(){
   clearInterval(CI);const t=$('trk');if(!t||t.children.length<2)return;
-  CI=setInterval(()=>{const n=t.children.length,i=Math.round(t.scrollLeft/t.clientWidth);t.scrollTo({left:((i+1)%n)*t.clientWidth,behavior:'smooth'})},4000);
+  CI=setInterval(()=>{if(document.hidden)return;const w=t.clientWidth;if(w===0)return;const n=t.children.length,i=Math.round(t.scrollLeft/w);t.scrollTo({left:((i+1)%n)*w,behavior:'smooth'})},7000);
 }
 const nsort=(a,b)=>(b.imp==='Yes')-(a.imp==='Yes')||(b.ts||0)-(a.ts||0);
 function noticeCard(x){
@@ -796,44 +771,10 @@ function qzStart(){
   QZ.qs=shuf(QZ.all).slice(0,10).map(q=>({q:q.q,ex:q.ex||'',o:shuf(q.o.map((t,i)=>({t,ok:i===q.a})))}));
   QZ.i=0;QZ.sc=0;QZ.pts=0;QZ.st=0;QZ.pick=-1;QZ.wrong=[];QZ.step='play';render();window.scrollTo(0,0);
 }
-
-/* ===== NEW: quiz sound effects (Web Audio) ===== */
-let AC=null;
-function sfx(ok){
-  try{
-    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
-    if(AC.state==='suspended')AC.resume();
-    const t=AC.currentTime;
-    if(ok){
-      [880,1320].forEach((f,i)=>{
-        const o=AC.createOscillator(),g=AC.createGain();
-        o.type='sine';o.frequency.value=f;
-        o.connect(g);g.connect(AC.destination);
-        const st=t+i*0.09;
-        g.gain.setValueAtTime(0.0001,st);
-        g.gain.linearRampToValueAtTime(0.22,st+0.01);
-        g.gain.exponentialRampToValueAtTime(0.0001,st+0.28);
-        o.start(st);o.stop(st+0.3);
-      });
-    }else{
-      const o=AC.createOscillator(),g=AC.createGain();
-      o.type='sawtooth';
-      o.frequency.setValueAtTime(180,t);
-      o.frequency.linearRampToValueAtTime(110,t+0.25);
-      o.connect(g);g.connect(AC.destination);
-      g.gain.setValueAtTime(0.0001,t);
-      g.gain.linearRampToValueAtTime(0.16,t+0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001,t+0.3);
-      o.start(t);o.stop(t+0.32);
-    }
-  }catch(e){}
-}
-
 function qzAns(k){
   if(QZ.pick>=0)return;
   const q=QZ.qs[QZ.i];QZ.pick=k;
-  if(q.o[k].ok){QZ.sc++;QZ.st++;QZ.pts+=10+(QZ.st>=3?5:0);sfx(true)}
-  else{QZ.st=0;QZ.wrong.push(q);sfx(false)}
+  if(q.o[k].ok){QZ.sc++;QZ.st++;QZ.pts+=10+(QZ.st>=3?5:0)}else{QZ.st=0;QZ.wrong.push(q)}
   render();
 }
 function qzNext(){
@@ -1121,27 +1062,6 @@ function setView(){
 }
 applySet();
 
-/* ===== NEW: unified tile color (all tiles share one color that changes together) ===== */
-(function(){
-  if(document.getElementById('ta-tile-style'))return;
-  const st=document.createElement('style');st.id='ta-tile-style';
-  st.textContent=`
-  :root{--tile:#7c5cff}
-  .grid .cc .ic,.cc .ic,.sj .ic{background:var(--tile)!important;color:#fff!important;transition:background .7s ease}
-  .sr .no{background:var(--tile)!important;color:#fff!important;transition:background .7s ease}
-  .sr.on{border-color:var(--tile)!important}
-  .scr>.top,.scr>.bar,.scr>.ah{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-  @media (prefers-color-scheme:dark){html:not([data-theme="light"]) .scr>.top,html:not([data-theme="light"]) .scr>.bar,html:not([data-theme="light"]) .scr>.ah{background:rgba(17,19,24,.9)}}
-  html[data-theme="dark"] .scr>.top,html[data-theme="dark"] .scr>.bar,html[data-theme="dark"] .scr>.ah{background:rgba(17,19,24,.9)}
-  html[data-theme="light"] .scr>.top,html[data-theme="light"] .scr>.bar,html[data-theme="light"] .scr>.ah{background:rgba(255,255,255,.9)}
-  `;
-  document.head.appendChild(st);
-})();
-const TILE_COLORS=['#7c5cff','#2f9bff','#12b886','#f2b705','#e0574d','#8e44ad','#0ea5e9'];
-let TIC=0;
-document.documentElement.style.setProperty('--tile',TILE_COLORS[0]);
-setInterval(()=>{TIC=(TIC+1)%TILE_COLORS.length;document.documentElement.style.setProperty('--tile',TILE_COLORS[TIC])},8000);
-
 /* ---------- YouTube videos ---------- */
 function ytId(u){
   const m=String(u||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{11})/);
@@ -1196,16 +1116,64 @@ function studyView(){
     +tl(T.tt[0],T.tt[1],"openList('tt')",0)
     +'</div></section>';
 }
+function resizeImage(file, maxSize = 200) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > height) {
+          if (width > maxSize) { height = Math.round(height * (maxSize / width)); width = maxSize; }
+        } else {
+          if (height > maxSize) { width = Math.round(width * (maxSize / height)); height = maxSize; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function uploadPhoto(e){
+  const file = e.target.files && e.target.files[0];
+  e.target.value = ''; 
+  if(!file) return;
+  toast('ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുന്നു...');
+  try {
+    const base64 = await resizeImage(file, 200);
+    await tmo(setDoc(doc(db, 'students', me.id), { photo: base64 }, { merge: true }));
+    me.photo = base64; 
+    render();
+    toast('ഫോട്ടോ മാറ്റി ✓');
+  } catch (err) {
+    console.error(err);
+    toast(errMsg(err, 'ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല'));
+  }
+}
+async function removePhoto(){
+  if(!confirm('ഫോട്ടോ ഒഴിവാക്കണോ?')) return;
+  try {
+    await tmo(updateDoc(doc(db, 'students', me.id), { photo: null }));
+    delete me.photo;
+    render();
+    toast('ഫോട്ടോ ഒഴിവാക്കി ✓');
+  } catch (err) {
+    toast('ഒഴിവാക്കാൻ കഴിഞ്ഞില്ല');
+  }
+}
 function meView(){
   const ini=String(me.name||'?').trim().charAt(0).toUpperCase();
-  
-  // ഫോട്ടോ ഉണ്ടെങ്കിൽ ഇമേജ് കാണിക്കുക, ഇല്ലെങ്കിൽ ആദ്യ അക്ഷരം കാണിക്കുക
   const avatarHtml = me.photo 
     ? '<img src="'+me.photo+'" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">' 
     : esc(ini);
-    
   const row=(ic,t,s,act,cl)=>'<button class="ol rowb'+(cl?' '+cl:'')+'" onclick="'+act+'"><div class="n">'+ico(ic)+'</div><div class="t">'+t+(s?'<small>'+s+'</small>':'')+'</div>'+(cl?'':ico('right'))+'</button>';
-  
   return '<section class="scr">'+instHelp()
     +'<div class="mecard" style="display:flex; align-items:center; gap:16px;">'
       +'<div style="position:relative; cursor:pointer;" onclick="document.getElementById(\'photo-input\').click()">'
@@ -1225,37 +1193,6 @@ function meView(){
     +(isStandalone()?'':row('dl','ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യൂ','ഹോം സ്ക്രീനിൽ ഐക്കൺ ചേർക്കാൻ',"doInstall()"))
     +row('out',MEF?'ഉറപ്പാണോ? ഒരിക്കൽ കൂടി അമർത്തൂ':'Exit (ലോഗൗട്ട്)','വീണ്ടും Student ID നൽകേണ്ടി വരും',"meOut()",'dng')
     +'</section>';
-}
-async function uploadPhoto(e){
-  const file = e.target.files && e.target.files[0];
-  e.target.value = ''; 
-  if(!file) return;
-  
-  toast('ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുന്നു...');
-  try {
-    const base64 = await resizeImage(file, 200);
-    // updateDoc-ന് പകരം setDoc merge:true ഉപയോഗിക്കുന്നത് സുരക്ഷിതമാണ്
-    await tmo(setDoc(doc(db, 'students', me.id), { photo: base64 }, { merge: true }));
-    me.photo = base64; 
-    render();
-    toast('ഫോട്ടോ മാറ്റി ✓');
-  } catch (err) {
-    console.error(err);
-    // errMsg ഉപയോഗിച്ചാൽ യഥാർത്ഥ എറർ (ഉദാ: permission-denied) കാണാം
-    toast(errMsg(err, 'ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല'));
-  }
-}
-
-async function removePhoto(){
-  if(!confirm('ഫോട്ടോ ഒഴിവാക്കണോ?')) return;
-  try {
-    await tmo(updateDoc(doc(db, 'students', me.id), { photo: null }));
-    delete me.photo;
-    render();
-    toast('ഫോട്ടോ ഒഴിവാക്കി ✓');
-  } catch (err) {
-    toast('ഒഴിവാക്കാൻ കഴിഞ്ഞില്ല');
-  }
 }
 function navh(){
   const s=V.s,k=V.k,nb=(AN||[]).filter(x=>x.imp==='Yes'||(x.ts&&Date.now()-x.ts<3*864e5)).length;
@@ -1301,53 +1238,12 @@ function render(){
   const h=s==='splash'?splash():s==='login'?login():s==='adminlogin'?adminLogin():s==='home'?home():s==='list'?list():s==='mp'?mp():s==='lib'?libView():s==='quiz'?quizView():s==='quran'?quranView():s==='study'?studyView():s==='me'?meView():s==='set'?setView():s==='admin'?admin():'<section class="scr hero"><h1>Thamheed Academy</h1><p style="margin-top:14px">ലോഡ് ചെയ്യുന്നു…</p></section>';
   const nav=s==='home'||s==='list'||s==='mp'||s==='lib'||s==='quiz'||s==='quran'||s==='study'||s==='me'||s==='set'||s==='admin';
   const key=s+':'+V.k+':'+(s==='quiz'?QZ.step:'')+(s==='mp'?MP.step:'')+(s==='lib'?LB.step:'')+(s==='admin'?V.sec:'');
-  
-  const an=key!==LK;
-  LK=key;
-  
-  if(an){
-    PH=(PH+1)%3;
-    // പേജ് മാറുമ്പോൾ ഹിസ്റ്ററിയിൽ സേവ് ചെയ്യുന്നു
-    if(!window.IS_BACK_BTN) { 
-      try { history.pushState({ key: key }, ''); } catch(e) {} 
-    }
-  }
-  
+  const an=key!==LK;LK=key;if(an)PH=(PH+1)%3;
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+(an?' anim':'')+' ph'+PH+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
   car();anim();
 }
-Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu,uploadPhoto,removePhoto});
-window.addEventListener('popstate', function(e) {
-  if (V.s === 'splash' || V.s === 'login' || V.s === 'adminlogin' || V.s === 'home' || V.s === 'admin') return; 
-  if (V.s === 'quiz') qzBack();
-  else if (V.s === 'mp') mpBack();
-  else if (V.s === 'lib') libBack();
-  else if (V.s === 'list' && V.k === 'yt') ytBack();
-  else if (V.s === 'study' || V.s === 'me' || V.s === 'quran' || V.s === 'set') go('home');
-  else goBack();
-  if (V.s !== 'home' && V.s !== 'admin' && V.s !== 'login' && V.s !== 'splash') {
-    try { history.pushState({ app: true }, ''); } catch(err) {}
-  }
-});
 
-// ബാക്ക് ബട്ടൺ അമർത്തുമ്പോൾ പ്രവർത്തിക്കാൻ
-window.addEventListener('popstate', function(e) {
-  window.IS_BACK_BTN = true; // render() ഹിസ്റ്ററി സേവ് ചെയ്യാതിരിക്കാൻ
-  
-  if (V.s === 'splash' || V.s === 'login' || V.s === 'adminlogin' || V.s === 'home' || V.s === 'admin') {
-    window.IS_BACK_BTN = false;
-    return; // ഹോം പേജിൽ ആണെങ്കിൽ ആപ്പ് ക്ലോസ് ആകട്ടെ
-  }
-  
-  if (V.s === 'quiz') qzBack();
-  else if (V.s === 'mp') mpBack();
-  else if (V.s === 'lib') libBack();
-  else if (V.s === 'list' && V.k === 'yt') ytBack();
-  else if (V.s === 'study' || V.s === 'me' || V.s === 'quran' || V.s === 'set') go('home');
-  else goBack();
-  
-  window.IS_BACK_BTN = false;
-});
+Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu,uploadPhoto,removePhoto});
 
 async function boot(){
   render();
