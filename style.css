@@ -569,57 +569,42 @@ nav button::after {
 .hb-icon { width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; z-index: 1; backdrop-filter: blur(10px); }
 .hb-icon svg { width: 28px; height: 28px; }
 
+/* ഐക്കൺ കൃത്യമായി വൃത്തത്തിനുള്ളിൽ ഒതുക്കാൻ */
 .ic-wrap {
   position: relative; 
-  width: 64px; 
-  height: 64px; 
-  border-radius: 50%; /* 👈 ഇത് വൃത്താകൃതി നൽകും */
-  background: var(--soft); 
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-  flex-shrink: 0; /* ഒരിക്കലും ഉരുണ്ട് പോകാതിരിക്കാൻ */
-  transition: all 0.3s ease;
-}
-/* ഐക്കണുകളുടെ പഴയ സോളിഡ് രൂപം തിരികെ കൊണ്ടുവരാൻ */
-.ic-wrap {
-  position: relative; 
-  width: 76px; 
-  height: 76px; 
+  width: 70px; 
+  height: 70px; 
   border-radius: 50%;
-  background: var(--tile); /* സോളിഡ് കളർ */
+  background: var(--tile);
   display: flex; 
   align-items: center; 
   justify-content: center;
   margin: 0 auto 14px;
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  overflow: hidden; /* ഇത് ഐക്കൺ പുറത്തേക്ക് വരുന്നത് തടയും */
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .ic-wrap::before {
-  display: none; /* പഴയ ഗ്ലോ ഇഫക്ട് മാറ്റാൻ */
+  display: none;
 }
 
 .ic { 
   position: relative; 
   z-index: 1; 
-  color: #fff; /* ഐക്കണിന്റെ നിറം വെളുപ്പ് */
+  color: #fff;
   display: flex; 
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
+/* ഐക്കണിന്റെ വലിപ്പം കുറച്ചു (32px ആക്കി) */
 .ic svg { 
-  width: 34px; 
-  height: 34px; 
+  width: 32px; 
+  height: 32px; 
   stroke-width: 2; 
-}
-.cc:active .ic-wrap::before { opacity: 0.3; }
-.ic { position: relative; z-index: 1; color: var(--tile); display: flex; }
-.ic svg { width: 28px; height: 28px; stroke-width: 1.8; }
-
-@media (prefers-color-scheme:dark){
-  .cc { background: linear-gradient(145deg, #1a1d2c, #151722); border-color: #2a2e45; }
-  .ic-wrap { background: rgba(255,255,255,0.03); }
 }
 html[data-theme="dark"] .cc { background: linear-gradient(145deg, #1a1d2c, #151722); border-color: #2a2e45; }
 html[data-theme="dark"] .ic-wrap { background: rgba(255,255,255,0.03); }
