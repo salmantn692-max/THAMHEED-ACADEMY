@@ -1340,7 +1340,26 @@ window.addEventListener('popstate', function(e) {
   
   setTimeout(() => { window.IS_POPPING = false; }, 50);
 });
+const VAPID_KEY = "BGdbdmmfTvVhnq3s8XDDvPdTFBdBQE3BxO0DtL0FzIX_CT_mukKwUjPizo2zEp8KuNqrdMj95v-r9gKnm7okPS8"; // ⚠️ ഇവിടെ നിങ്ങളുടെ VAPID Key നൽകുക
 
+async function setupNotifications() {
+  if (!('Notification' in window)) return;
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      const messaging = getMessaging(fb);
+      const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+      if (token) {
+        await setDoc(doc(db, 'students', me.id), { fcmToken: token }, { merge: true });
+      }
+      onMessage(messaging, (payload) => {
+        toast(`🔔 ${payload.notification.title}: ${payload.notification.body}`);
+      });
+    }
+  } catch (error) {
+    console.error('Notification setup failed:', error);
+  }
+}
 async function boot(){
   render();
   const u=await tmo(new Promise(r=>{const f=onAuthStateChanged(auth,x=>{f();r(x)})}),8000).catch(()=>null);
