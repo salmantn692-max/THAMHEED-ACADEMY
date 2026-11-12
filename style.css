@@ -581,21 +581,37 @@ nav button::after {
   flex-shrink: 0; /* ഒരിക്കലും ഉരുണ്ട് പോകാതിരിക്കാൻ */
   transition: all 0.3s ease;
 }
-.ic-wrap::before {
-  content: ''; 
-  position: absolute; 
-  inset: 0; 
-  border-radius: 50%; 
-  background: var(--tile); 
-  opacity: 0.15; 
-  filter: blur(10px); 
-  z-index: 0;
-  transition: opacity 0.3s ease;
+/* ഐക്കണുകളുടെ പഴയ സോളിഡ് രൂപം തിരികെ കൊണ്ടുവരാൻ */
+.ic-wrap {
+  position: relative; 
+  width: 76px; 
+  height: 76px; 
+  border-radius: 50%;
+  background: var(--tile); /* സോളിഡ് കളർ */
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  margin: 0 auto 14px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
+
 .ic-wrap::before {
-  content: ''; position: absolute; inset: 0; border-radius: 18px;
-  background: var(--tile); opacity: 0.1; filter: blur(8px); z-index: 0;
-  transition: opacity 0.3s ease;
+  display: none; /* പഴയ ഗ്ലോ ഇഫക്ട് മാറ്റാൻ */
+}
+
+.ic { 
+  position: relative; 
+  z-index: 1; 
+  color: #fff; /* ഐക്കണിന്റെ നിറം വെളുപ്പ് */
+  display: flex; 
+}
+
+.ic svg { 
+  width: 34px; 
+  height: 34px; 
+  stroke-width: 2; 
 }
 .cc:active .ic-wrap::before { opacity: 0.3; }
 .ic { position: relative; z-index: 1; color: var(--tile); display: flex; }
