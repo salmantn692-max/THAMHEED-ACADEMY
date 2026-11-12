@@ -26,7 +26,7 @@ const EX={q:['QUARTERLY EXAM','Quarterly Question Paper','clip'],h:['HALF YEARLY
 let MP={step:'sub',sub:'',paper:''},SUBS=null,PAP=null,TF=null;const PB={},TFU={};
 let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},SL=[],LV=[],AN=null,LST=null,PI=null,PK='',tp=0,tmr,CI,unsub=[];
 let W={m:'c',c:'1',i:0,t:'',r:false};
-window.IS_POPPING = false; // 👈 ബാക്ക് ബട്ടൺ വേരിയബിൾ
+window.IS_POPPING = false; // ബാക്ക് ബട്ടൺ വേരിയബിൾ
 const A=k=>DA[k]||[];
 const IC={
 user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
@@ -57,13 +57,45 @@ clip:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 
 cap:'<path d="M22 10L12 5 2 10l10 5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>',
 star:'<path d="M12 2l3 6.5 7 .9-5.2 4.8 1.4 7L12 17.8 5.8 21.2l1.4-7L2 9.4l7-.9z"/>',
 zap:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
-moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+quran:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M12 6l1.5 2.5 2.5.5-2 2 .5 2.5-2.5-1.5-2.5 1.5.5-2.5-2-2 2.5-.5z"/>',
 pause:'<path d="M8 5v14M16 5v14"/>',
 play2:'<path d="M7 4l13 8-13 8z"/>',
 skipf:'<path d="M5 4l10 8-10 8z"/><path d="M19 5v14"/>',
 skipb:'<path d="M19 4L9 12l10 8z"/><path d="M5 5v14"/>'
 };
 const ico=n=>'<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(IC[n]||'')+'</svg>';
+
+// ===== ക്വിസ് സൗണ്ട് എഫക്റ്റ് (Web Audio) =====
+let AC=null;
+function sfx(ok){
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    const t=AC.currentTime;
+    if(ok){
+      [880,1320].forEach((f,i)=>{
+        const o=AC.createOscillator(),g=AC.createGain();
+        o.type='sine';o.frequency.value=f;
+        o.connect(g);g.connect(AC.destination);
+        const st=t+i*0.09;
+        g.gain.setValueAtTime(0.0001,st);
+        g.gain.linearRampToValueAtTime(0.22,st+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001,st+0.28);
+        o.start(st);o.stop(st+0.3);
+      });
+    }else{
+      const o=AC.createOscillator(),g=AC.createGain();
+      o.type='sawtooth';
+      o.frequency.setValueAtTime(180,t);
+      o.frequency.linearRampToValueAtTime(110,t+0.25);
+      o.connect(g);g.connect(AC.destination);
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.linearRampToValueAtTime(0.16,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.3);
+      o.start(t);o.stop(t+0.32);
+    }
+  }catch(e){}
+}
 
 function toast(m){const e=$('toast');if(!e)return;e.textContent=m;e.classList.add('on');clearTimeout(tmr);tmr=setTimeout(()=>e.classList.remove('on'),2400)}
 let HT=0,LK='',BK='home',PH=0;
@@ -186,7 +218,7 @@ function dots(t){const d=$('dts');if(!d)return;const w=t.clientWidth;if(w===0)re
 function stopCar(){clearInterval(CI)}
 function car(){
   clearInterval(CI);const t=$('trk');if(!t||t.children.length<2)return;
-  CI=setInterval(()=>{if(document.hidden)return;const w=t.clientWidth;if(w===0)return;const n=t.children.length,i=Math.round(t.scrollLeft/w);t.scrollTo({left:((i+1)%n)*w,behavior:'smooth'})},7000);
+  CI=setInterval(()=>{if(document.hidden)return;const w=t.clientWidth;if(w===0)return;const n=t.children.length,i=Math.round(t.scrollLeft/w);t.scrollTo({left:((i+1)%n)*w,behavior:'smooth'})},7000); // 7 സെക്കൻഡ്
 }
 const nsort=(a,b)=>(b.imp==='Yes')-(a.imp==='Yes')||(b.ts||0)-(a.ts||0);
 function noticeCard(x){
@@ -195,10 +227,43 @@ function noticeCard(x){
 }
 function home(){
   const nz=(AN||[]).slice().sort(nsort).slice(0,3);
-  const tiles=Object.keys(T).map(k=>'<button class="cc" onclick="openList(\''+k+'\')"><div class="ic">'+ico(T[k][0])+'</div><b>'+T[k][1]+'</b></button>').join('')+'<button class="cc" onclick="openMP()"><div class="ic">'+ico('file')+'</div><b>Model Paper</b></button><button class="cc" onclick="openQuiz()"><div class="ic">'+ico('zap')+'</div><b>ക്വിസ്</b></button>'+(QCL.includes(String(me.cls))?'<button class="cc" onclick="openQuran()"><div class="ic">'+ico('moon')+'</div><b>ഖുർആൻ</b></button>':'');
+  
+  // മുകളിലെ പ്രീമിയം ബാനർ
+  let heroBanner = '';
+  if(LV && LV.length > 0) {
+    heroBanner = `<div class="hero-banner" onclick="openList('live')">
+      <div class="hb-content">
+        <span class="hb-tag">🔴 Live Now</span>
+        <h3>${esc(LV[0].t)}</h3>
+        <p>${esc(LV[0].time)}</p>
+      </div>
+      <div class="hb-icon">${ico('video')}</div>
+    </div>`;
+  } else if(AN && AN.length > 0) {
+    heroBanner = `<div class="hero-banner notice" onclick="openList('ann')">
+      <div class="hb-content">
+        <span class="hb-tag">📢 അറിയിപ്പ്</span>
+        <h3>${esc(AN[0].t)}</h3>
+      </div>
+      <div class="hb-icon">${ico('bell')}</div>
+    </div>`;
+  }
+
+  // പുതിയ രീതിയിലുള്ള ഐക്കൺ ടൈലുകൾ
+  const tiles=Object.keys(T).map(k=>`
+    <button class="cc" onclick="openList('${k}')">
+      <div class="ic-wrap"><div class="ic">${ico(T[k][0])}</div></div>
+      <b>${T[k][1]}</b>
+    </button>`).join('') 
+    + `<button class="cc" onclick="openMP()"><div class="ic-wrap"><div class="ic">${ico('file')}</div></div><b>Model Paper</b></button>`
+    + `<button class="cc" onclick="openQuiz()"><div class="ic-wrap"><div class="ic">${ico('zap')}</div></div><b>ക്വിസ്</b></button>` 
+    + (QCL.includes(String(me.cls))?`<button class="cc" onclick="openQuran()"><div class="ic-wrap"><div class="ic">${ico('quran')}</div></div><b>ഖുർആൻ</b></button>`:'');
+
   return '<section class="scr"><div class="top"><div><small>അസ്സലാമു അലൈക്കും</small><h2>'+esc(me.name)+'</h2></div><div class="tag">ക്ലാസ് '+esc(me.cls)+'</div></div>'
-  +(nz.length?'<div class="nb"><div class="nbh"><div class="bi">'+ico('bell')+'</div><b>നോട്ടീസ് ബോർഡ്</b>'+(AN&&AN.length>3?'<button class="more" onclick="openList(\'ann\')">എല്ലാം കാണുക</button>':'')+'</div>'+nz.map(noticeCard).join('')+'</div>':'')
-  +carousel()+'<div class="sec"><h3>നിങ്ങളുടെ പഠനം</h3></div><div class="grid">'+tiles+'</div></section>';
+  + heroBanner
+  + carousel()
+  + (nz.length?'<div class="nb"><div class="nbh"><div class="bi">'+ico('bell')+'</div><b>നോട്ടീസ് ബോർഡ്</b>'+(AN&&AN.length>3?'<button class="more" onclick="openList(\'ann\')">എല്ലാം കാണുക</button>':'')+'</div>'+nz.map(noticeCard).join('')+'</div>':'')
+  + '<div class="sec"><h3>നിങ്ങളുടെ പഠനം</h3></div><div class="grid">'+tiles+'</div></section>';
 }
 function item(k,x){
   const ti=k==='tt'?x.sub:x.t,sm=k==='live'?x.time:k==='tt'?x.day+' · '+x.time:k==='ann'?(x.d||'')+' '+(x.b||''):'',u=safe(x.url);
@@ -371,7 +436,7 @@ function mp(){
   if(SUBS===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
   if(MP.step==='sub'){
     if(!SUBS.length)return h+'<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div></section>';
-    return h+'<div class="grid">'+SUBS.map(s=>{const soon=s.soon==='Yes';return '<button class="cc sj" '+(soon?'disabled':'onclick="mpSub(\''+s._id+'\')"')+'><div class="ic">'+ico('layers')+'</div>'+(s.ar?'<b class="ar" dir="auto">'+esc(s.ar)+'</b>':'')+'<b>'+esc(s.name)+'</b>'+(soon?'<div class="rb">COMING SOON</div>':'')+'</button>'}).join('')+'</div></section>';
+    return h+'<div class="grid">'+SUBS.map(s=>{const soon=s.soon==='Yes';return '<button class="cc sj" '+(soon?'disabled':'onclick="mpSub(\''+s._id+'\')"')+'><div class="ic-wrap"><div class="ic">'+ico('layers')+'</div></div>'+(s.ar?'<b class="ar" dir="auto">'+esc(s.ar)+'</b>':'')+'<b>'+esc(s.name)+'</b>'+(soon?'<div class="rb">COMING SOON</div>':'')+'</button>'}).join('')+'</div></section>';
   }
   if(MP.step==='exam'){
     const sj=SUBS.find(x=>x._id===MP.sub)||{name:''},ps=PAP.filter(p=>p.sub===MP.sub);
@@ -547,7 +612,7 @@ async function delT(id){
   refresh();
 }
 
-/* ---------- file cache (saves Firebase reads) ---------- */
+/* ---------- file cache ---------- */
 const fcache={
   async get(k){try{const c=await caches.open('thamheed-files'),r=await c.match(k);return r?await r.blob():null}catch(e){return null}},
   async put(k,b){
@@ -559,7 +624,7 @@ const fcache={
   }
 };
 
-/* ---------- Attendance (day by day) ---------- */
+/* ---------- Attendance ---------- */
 const MN=['ജനുവരി','ഫെബ്രുവരി','മാർച്ച്','ഏപ്രിൽ','മേയ്','ജൂൺ','ജൂലൈ','ഓഗസ്റ്റ്','സെപ്റ്റംബർ','ഒക്ടോബർ','നവംബർ','ഡിസംബർ'];
 const ym=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
 const isoDay=d=>ym(d)+'-'+String(d.getDate()).padStart(2,'0');
@@ -621,7 +686,7 @@ function attPanel(){
   return h+'<button class="cta" style="max-width:none;margin-top:8px" onclick="atSave()">ഹാജർ സേവ് ചെയ്യുക</button>';
 }
 
-/* ---------- Madrasa Book / Notes and Syllabus ---------- */
+/* ---------- Library ---------- */
 const KL={book:'മദ്റസ Book / Notes',syll:'Syllabus'};
 let LB={step:'menu',kind:'',items:null,subs:[]};
 async function fileBlob(col,f){
@@ -660,7 +725,7 @@ function libPick(k){LB.kind=k;LB.step='list';render();window.scrollTo(0,0)}
 function libBack(){if(LB.step==='list'){LB.step='menu';render()}else go(BK);window.scrollTo(0,0)}
 function libView(){
   let h='<section class="scr"><div class="bar"><button onclick="libBack()" aria-label="Back">'+ico('back')+'</button><span>Notes &amp; Syllabus</span><span style="width:44px"></span></div>';
-  if(LB.step==='menu')return h+'<p class="mu">ഒന്ന് തിരഞ്ഞെടുക്കൂ</p><div class="grid"><button class="cc" onclick="libPick(\'book\')"><div class="ic">'+ico('book')+'</div><b>'+KL.book+'</b></button><button class="cc" onclick="libPick(\'syll\')"><div class="ic">'+ico('clip')+'</div><b>'+KL.syll+'</b></button></div></section>';
+  if(LB.step==='menu')return h+'<p class="mu">ഒന്ന് തിരഞ്ഞെടുക്കൂ</p><div class="grid"><button class="cc" onclick="libPick(\'book\')"><div class="ic-wrap"><div class="ic">'+ico('book')+'</div></div><b>'+KL.book+'</b></button><button class="cc" onclick="libPick(\'syll\')"><div class="ic-wrap"><div class="ic">'+ico('clip')+'</div></div><b>'+KL.syll+'</b></button></div></section>';
   if(LB.items===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
   const l=LB.items.filter(x=>x.kind===LB.kind);
   h+='<h2 class="mh">'+KL[LB.kind]+'</h2>';
@@ -774,7 +839,7 @@ function qzStart(){
 function qzAns(k){
   if(QZ.pick>=0)return;
   const q=QZ.qs[QZ.i];QZ.pick=k;
-  if(q.o[k].ok){QZ.sc++;QZ.st++;QZ.pts+=10+(QZ.st>=3?5:0)}else{QZ.st=0;QZ.wrong.push(q)}
+  if(q.o[k].ok){QZ.sc++;QZ.st++;QZ.pts+=10+(QZ.st>=3?5:0);sfx(true)}else{QZ.st=0;QZ.wrong.push(q);sfx(false)}
   render();
 }
 function qzNext(){
@@ -792,7 +857,7 @@ function quizView(){
   if(QZ.step==='sub'){
     if(QZ.subs===null)return h+'<div class="sk"><i></i><i></i><i></i></div></section>';
     if(!QZ.subs.length)return h+'<div class="empty">ഇപ്പോൾ ഒന്നുമില്ല.</div></section>';
-    return h+'<p class="mu">ഒരു വിഷയം തിരഞ്ഞെടുക്കൂ</p><div class="grid">'+QZ.subs.map(s=>{const soon=s.soon==='Yes';return '<button class="cc sj" '+(soon?'disabled':'onclick="qzSub(\''+s._id+'\')"')+'><div class="ic">'+ico('zap')+'</div>'+(s.ar?'<b class="ar" dir="auto">'+esc(s.ar)+'</b>':'')+'<b>'+esc(s.name)+'</b>'+(soon?'<div class="rb">COMING SOON</div>':'')+'</button>'}).join('')+'</div></section>';
+    return h+'<p class="mu">ഒരു വിഷയം തിരഞ്ഞെടുക്കൂ</p><div class="grid">'+QZ.subs.map(s=>{const soon=s.soon==='Yes';return '<button class="cc sj" '+(soon?'disabled':'onclick="qzSub(\''+s._id+'\')"')+'><div class="ic-wrap"><div class="ic">'+ico('zap')+'</div></div>'+(s.ar?'<b class="ar" dir="auto">'+esc(s.ar)+'</b>':'')+'<b>'+esc(s.name)+'</b>'+(soon?'<div class="rb">COMING SOON</div>':'')+'</button>'}).join('')+'</div></section>';
   }
   if(QZ.step==='ch'){
     h+='<h2 class="mh">'+esc(QZ.subn)+'</h2><p class="mu">ഒരു ചാപ്റ്റർ തിരഞ്ഞെടുക്കൂ</p>';
@@ -1013,7 +1078,7 @@ async function delSu(id){
   refresh();
 }
 
-/* ---------- Settings (font, size, theme) ---------- */
+/* ---------- Settings ---------- */
 const FONTS=[
  ['def','ഡിഫോൾട്ട് (Outfit)','','"Outfit","Noto Sans Malayalam",system-ui,sans-serif'],
  ['manjari','Manjari (മഞ്ജരി)','Manjari:wght@400;700','"Manjari","Noto Sans Malayalam",sans-serif'],
@@ -1098,7 +1163,6 @@ function ytView(){
 }
 
 /* ---------- shell ---------- */
-
 let MEF=false;
 function goBack(){go(BK)}
 function navTo(k){BK='home';if(k==='quiz')openQuiz();else openQuran()}
@@ -1107,7 +1171,7 @@ function meOut(){
   MEF=false;out();
 }
 function studyView(){
-  const tl=(ic,lb,act,dot)=>'<button class="cc" onclick="'+act+'">'+(dot?'<span class="ld"></span>':'')+'<div class="ic">'+ico(ic)+'</div><b>'+lb+'</b></button>';
+  const tl=(ic,lb,act,dot)=>'<button class="cc" onclick="'+act+'">'+(dot?'<span class="ld"></span>':'')+'<div class="ic-wrap"><div class="ic">'+ico(ic)+'</div></div><b>'+lb+'</b></button>';
   return '<section class="scr"><div class="top"><div><small>പഠനം</small><h2>എന്താണ് പഠിക്കേണ്ടത്?</h2></div></div><div class="grid">'
     +tl(T.live[0],T.live[1],"openList('live')",LV&&LV.length)
     +tl(T.yt[0],T.yt[1],"openList('yt')",0)
@@ -1116,6 +1180,7 @@ function studyView(){
     +tl(T.tt[0],T.tt[1],"openList('tt')",0)
     +'</div></section>';
 }
+
 function resizeImage(file, maxSize = 200) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1170,16 +1235,11 @@ async function removePhoto(){
 }
 function meView(){
   const ini=String(me.name||'?').trim().charAt(0).toUpperCase();
-  
-  // ഫോട്ടോ ഉണ്ടെങ്കിൽ ഇമേജ് കാണിക്കുക, ഇല്ലെങ്കിൽ ആദ്യ അക്ഷരം
   const avatarHtml = me.photo 
     ? '<img src="'+me.photo+'" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">' 
     : esc(ini);
 
-  // ഫോട്ടോയുടെ മുകളിൽ കാണിക്കുന്ന എഡിറ്റ് (പെൻസിൽ) ഐക്കൺ
   const pencilIcon = `<div style="position:absolute; bottom:0; right:0; background:var(--g); color:#fff; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.2); border:3px solid var(--card); font-size:14px;">✏️</div>`;
-  
-  // ഫോട്ടോ ഉണ്ടെങ്കിൽ മാത്രം കാണിക്കുന്ന റിമൂവ് (✕) ഐക്കൺ
   const trashIcon = me.photo ? `<div onclick="event.stopPropagation(); removePhoto();" style="position:absolute; top:0; right:0; background:#e0574d; color:#fff; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.2); border:3px solid var(--card); font-size:12px; font-weight:bold; z-index:2;">✕</div>` : '';
 
   const row=(ic,t,s,act,cl)=>'<button class="ol rowb'+(cl?' '+cl:'')+'" onclick="'+act+'"><div class="n">'+ico(ic)+'</div><div class="t">'+t+(s?'<small>'+s+'</small>':'')+'</div>'+(cl?'':ico('right'))+'</button>';
@@ -1204,7 +1264,7 @@ function meView(){
     +'</div>'
     +row('check','ഹാജർ','മാസം തിരിച്ചുള്ള കലണ്ടർ',"openList('att')")
     +(isStandalone()?'':row('dl','ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യൂ','ഹോം സ്ക്രീനിൽ ഐക്കൺ ചേർക്കാൻ',"doInstall()"))
-    +row('out',MEF?'ഉറപ്പാണോ? ഒരിക്കൽ കൂടി അമർത്തൂ':'Exit (ലോഗൗട്ട്)','വീണ്ടും Student ID നൽകേണ്ടി വരും',"meOut()",'dng')
+    +row('out',MEF?'ഉറപ്പാണോ? ഒരിക്കൽ കൂടി അമർത്തുക':'Exit (ലോഗൗട്ട്)','വീണ്ടും Student ID നൽകേണ്ടി വരും',"meOut()",'dng')
     +'</section>';
 }
 function navh(){
@@ -1215,7 +1275,7 @@ function navh(){
     h+=B(s==='home'||(s==='list'&&k==='ann'),"go('home')",'home','Home',s==='home'?0:nb);
     h+=B(s==='study'||s==='mp'||s==='lib'||(s==='list'&&['live','yt','notes','tt'].includes(k)),"go('study')",'layers','പഠനം',0);
     h+=B(s==='quiz',"navTo('quiz')",'zap','ക്വിസ്',0);
-    if(QCL.includes(String(me.cls)))h+=B(s==='quran',"navTo('quran')",'moon','ഖുർആൻ',0);
+    if(QCL.includes(String(me.cls)))h+=B(s==='quran',"navTo('quran')",'quran','ഖുർആൻ',0);
     h+=B(s==='me'||(s==='list'&&k==='att'),"go('me')",'user','ഞാൻ',0);
   }
   if(adm)h+=B(s==='set',"go('set')",'sliders','Settings',0)+B(s==='admin',"go('admin')",'shield','Admin',0)+B(false,'out()','out','Exit',0);
@@ -1253,11 +1313,9 @@ function render(){
   const key=s+':'+V.k+':'+(s==='quiz'?QZ.step:'')+(s==='mp'?MP.step:'')+(s==='lib'?LB.step:'')+(s==='admin'?V.sec:'');
   const an=key!==LK;LK=key;if(an)PH=(PH+1)%3;
 
-  // 👇 ബാക്ക് ബട്ടൺ സ്റ്റെപ്പ് 2 👇
   if(an && !window.IS_POPPING && s!=='boot') {
     try { history.pushState({ key: key }, ''); } catch(e) {}
   }
-  // 👆 ബാക്ക് ബട്ടൺ സ്റ്റെപ്പ് 2 👆
 
   $('app').innerHTML='<div class="app'+(nav?' hn':'')+(an?' anim':'')+' ph'+PH+'">'+h+(nav?navh():'')+(QP.n&&me&&s!=='admin'?miniPlayer():'')+'<div class="toast" id="toast"></div></div>';
   car();anim();
@@ -1265,7 +1323,6 @@ function render(){
 
 Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu,uploadPhoto,removePhoto});
 
-// 👇 ബാക്ക് ബട്ടൺ സ്റ്റെപ്പ് 3 👇
 window.addEventListener('popstate', function(e) {
   window.IS_POPPING = true; 
   
@@ -1283,7 +1340,6 @@ window.addEventListener('popstate', function(e) {
   
   setTimeout(() => { window.IS_POPPING = false; }, 50);
 });
-// 👆 ബാക്ക് ബട്ടൺ സ്റ്റെപ്പ് 3 👆
 
 async function boot(){
   render();
