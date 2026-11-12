@@ -570,9 +570,27 @@ nav button::after {
 .hb-icon svg { width: 28px; height: 28px; }
 
 .ic-wrap {
-  position: relative; width: 56px; height: 56px; border-radius: 18px;
-  background: var(--soft); display: flex; align-items: center; justify-content: center;
+  position: relative; 
+  width: 64px; 
+  height: 64px; 
+  border-radius: 50%; /* 👈 ഇത് വൃത്താകൃതി നൽകും */
+  background: var(--soft); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  flex-shrink: 0; /* ഒരിക്കലും ഉരുണ്ട് പോകാതിരിക്കാൻ */
   transition: all 0.3s ease;
+}
+.ic-wrap::before {
+  content: ''; 
+  position: absolute; 
+  inset: 0; 
+  border-radius: 50%; 
+  background: var(--tile); 
+  opacity: 0.15; 
+  filter: blur(10px); 
+  z-index: 0;
+  transition: opacity 0.3s ease;
 }
 .ic-wrap::before {
   content: ''; position: absolute; inset: 0; border-radius: 18px;
