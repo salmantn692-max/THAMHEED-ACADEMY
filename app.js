@@ -3,6 +3,7 @@ import {getAuth,signInAnonymously,signInWithEmailAndPassword,signOut,onAuthState
 import {initializeFirestore,collection,doc,getDoc,getDocs,setDoc,addDoc,updateDoc,deleteDoc,query,where,onSnapshot,writeBatch,arrayUnion,arrayRemove} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {firebaseConfig,ADMIN_EMAILS} from "./firebase-config.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js";
+
 const fb=initializeApp(firebaseConfig),auth=getAuth(fb),db=initializeFirestore(fb,{experimentalAutoDetectLongPolling:true},'default');
 const tmo=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r({code:"timeout"}),ms||10000))]);
 const $=i=>document.getElementById(i);
@@ -26,7 +27,7 @@ const EX={q:['QUARTERLY EXAM','Quarterly Question Paper','clip'],h:['HALF YEARLY
 let MP={step:'sub',sub:'',paper:''},SUBS=null,PAP=null,TF=null;const PB={},TFU={};
 let V={s:'boot',k:'',sec:'students',ed:'',cd:''},me=null,adm=false,DA={},CT={},SL=[],LV=[],AN=null,LST=null,PI=null,PK='',tp=0,tmr,CI,unsub=[];
 let W={m:'c',c:'1',i:0,t:'',r:false};
-window.IS_POPPING = false; // ബാക്ക് ബട്ടൺ വേരിയബിൾ
+window.IS_POPPING = false;
 const A=k=>DA[k]||[];
 const IC={
 user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
@@ -65,7 +66,6 @@ skipb:'<path d="M19 4L9 12l10 8z"/><path d="M5 5v14"/>'
 };
 const ico=n=>'<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(IC[n]||'')+'</svg>';
 
-// ===== ക്വിസ് സൗണ്ട് എഫക്റ്റ് (Web Audio) =====
 let AC=null;
 function sfx(ok){
   try{
@@ -106,7 +106,6 @@ async function refreshHome(){
 }
 function go(s,k){if(s==='study'||s==='me')BK=s;else if(s==='home')BK='home';V.s=s;V.k=k||'';render();window.scrollTo(0,0);if(s==='home'&&me&&AN!==null&&Date.now()-HT>60000)refreshHome()}
 
-/* ---------- data ---------- */
 async function fetchK(k){
   const c=collection(db,k);
   const rs=await Promise.all([getDocs(query(c,where('cls','==','All'))),getDocs(query(c,where('cls','==',String(me.cls))))]);
@@ -144,7 +143,6 @@ function watch(){
   unsub.push(onSnapshot(collection(db,'papers'),s=>{DA.papers=s.docs.map(d=>({_id:d.id,...d.data()})).sort((a,b)=>(a.ts||0)-(b.ts||0));if(V.s==='admin')refresh()},()=>{}));
 }
 
-/* ---------- auth ---------- */
 function errMsg(e,d){
   const c=(e&&e.code)||'';
   const m={
@@ -188,7 +186,6 @@ async function out(){
 }
 function tap(){tp++;if(tp>=5){tp=0;go(adm?'admin':'adminlogin')}}
 
-/* ---------- student screens ---------- */
 function hero(inner){return '<section class="scr hero"><div class="logo" onclick="tap()"><img src="icon-192.png" alt="Thamheed Academy logo"></div><h1>Thamheed Academy</h1>'+inner+'</section>'}
 let DIP=null,HELP=false;
 const isStandalone=()=>{try{return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}catch(e){return false}};
@@ -218,7 +215,7 @@ function dots(t){const d=$('dts');if(!d)return;const w=t.clientWidth;if(w===0)re
 function stopCar(){clearInterval(CI)}
 function car(){
   clearInterval(CI);const t=$('trk');if(!t||t.children.length<2)return;
-  CI=setInterval(()=>{if(document.hidden)return;const w=t.clientWidth;if(w===0)return;const n=t.children.length,i=Math.round(t.scrollLeft/w);t.scrollTo({left:((i+1)%n)*w,behavior:'smooth'})},7000); // 7 സെക്കൻഡ്
+  CI=setInterval(()=>{if(document.hidden)return;const w=t.clientWidth;if(w===0)return;const n=t.children.length,i=Math.round(t.scrollLeft/w);t.scrollTo({left:((i+1)%n)*w,behavior:'smooth'})},7000);
 }
 const nsort=(a,b)=>(b.imp==='Yes')-(a.imp==='Yes')||(b.ts||0)-(a.ts||0);
 function noticeCard(x){
@@ -228,7 +225,6 @@ function noticeCard(x){
 function home(){
   const nz=(AN||[]).slice().sort(nsort).slice(0,3);
   
-  // മുകളിലെ പ്രീമിയം ബാനർ
   let heroBanner = '';
   if(LV && LV.length > 0) {
     heroBanner = `<div class="hero-banner" onclick="openList('live')">
@@ -249,7 +245,6 @@ function home(){
     </div>`;
   }
 
-  // പുതിയ രീതിയിലുള്ള ഐക്കൺ ടൈലുകൾ
   const tiles=Object.keys(T).map(k=>`
     <button class="cc" onclick="openList('${k}')">
       <div class="ic-wrap"><div class="ic">${ico(T[k][0])}</div></div>
@@ -277,7 +272,7 @@ function list(){
   else h+=(k==='ann'?LST.slice().sort(nsort).map(noticeCard):LST.map(x=>item(k,x))).join('');
   return h+'</section>';
 }
-/* ---------- admin ---------- */
+
 const SECS=()=>Object.keys(S).map(k=>[k,S[k].l,A(k).length]).concat([['att','ഹാജർ'],['quiz','ക്വിസ്'],['quran','ഖുർആൻ'],['lib','Book / Notes & Syllabus',A('lib').length],['ttf','Time Table',A('tfiles').length],['papers','Model Paper',A('papers').length],['wa','WhatsApp'],['push','Notifications']]);
 const chips=()=>SECS().map(x=>'<button class="mi'+(x[0]===V.sec?' on':'')+'" onclick="sec(\''+x[0]+'\')"><span>'+x[1]+'</span>'+(x[2]!=null?'<small>'+x[2]+'</small>':'')+'</button>').join('');
 function sec(k){V.sec=k;V.ed='';V.cd='';AM=false;render();if(k==='att')atSel()}
@@ -359,34 +354,6 @@ async function del(id){
   }catch(e){toast('ഒഴിവാക്കാൻ കഴിഞ്ഞില്ല')}
   refresh();
 }
-async function sendPush(){
-  const title = $('n_t').value.trim();
-  const body = $('n_b').value.trim();
-  if(!title || !body) { toast('തലക്കെട്ടും സന്ദേശവും നൽകുക'); return; }
-  
-  toast('അയക്കുന്നു... കാത്തിരിക്കൂ');
-  
-  // ഇവിടെ നമ്മൾ എല്ലാ വിദ്യാർത്ഥികളുടെയും FCM ടോക്കണുകൾ എടുക്കുന്നു
-  const st = A('students');
-  const tokens = st.map(s => s.fcmToken).filter(t => t); // ടോക്കൺ ഉള്ളവരെ മാത്രം
-  
-  if(tokens.length === 0) {
-    toast('ആരും നോട്ടിഫിക്കേഷൻ അനുവദിച്ചിട്ടില്ല');
-    return;
-  }
-
-  // Firebase Console-ലേക്ക് പോകാതെ നോട്ടിഫിക്കേഷൻ അയക്കാൻ, നമുക്ക് നിലവിൽ Firebase-ന്റെ REST API ഉപയോഗിക്കാം
-  // അതിന് Firebase Console -> Project Settings -> Cloud Messaging -> Server Key ആവശ്യമാണ്.
-  // തൽക്കാലം, ഇത് Firebase Console-ൽ നിന്ന് അയക്കാൻ ഒരു എളുപ്പവഴി കാണിക്കാം:
-  
-  // (നോട്ട്: സെർവർ കീ ഇല്ലാതെ നേരിട്ട് ബ്രൗസറിൽ നിന്ന് അയക്കാൻ സാധ്യമല്ല. അതിനാൽ ഇത് ഒരു ഡെമോ ആണ്)
-  
-  try {
-    // ഒരു ടോക്കൺ ഉപയോഗിച്ച് ടെസ്റ്റ് ചെയ്യാൻ
-    const testToken = tokens[0];
-    toast('സക്സസ്! ഫയർബേസ് കൺസോളിൽ നിന്ന് നോട്ടിഫിക്കേഷൻ അയക്കാം.');
-  } catch(e) { toast('എറർ വന്നു'); }
-}
 function waRead(){const m=$('w_m');if(m)W.m=m.value;const c=$('w_c');if(c)W.c=c.value;const i=$('w_i');if(i)W.i=+i.value;const t=$('w_t');if(t)W.t=t.value;W.r=false}
 function waT(v){W.t=v}
 function waGo(){waRead();W.r=true;render()}
@@ -412,7 +379,6 @@ function waPanel(){
   return h;
 }
 
-/* ---------- Model Paper ---------- */
 const b64of=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(f)});
 const canShareFiles=()=>{try{return !!(navigator.canShare&&navigator.canShare({files:[new File([''],'a.pdf',{type:'application/pdf'})]}))}catch(e){return false}};
 async function pdfBlob(p){
@@ -526,7 +492,6 @@ async function delP(id){
   refresh();
 }
 
-/* ---------- Time Table files ---------- */
 async function tfBlob(f){
   if(PB['t'+f._id])return PB['t'+f._id];
   const key='/_f/tfiles/'+f._id+'/'+(f.v||f.ts||0)+'/'+(f.n||0);
@@ -641,7 +606,6 @@ async function delT(id){
   refresh();
 }
 
-/* ---------- file cache ---------- */
 const fcache={
   async get(k){try{const c=await caches.open('thamheed-files'),r=await c.match(k);return r?await r.blob():null}catch(e){return null}},
   async put(k,b){
@@ -653,7 +617,6 @@ const fcache={
   }
 };
 
-/* ---------- Attendance ---------- */
 const MN=['ജനുവരി','ഫെബ്രുവരി','മാർച്ച്','ഏപ്രിൽ','മേയ്','ജൂൺ','ജൂലൈ','ഓഗസ്റ്റ്','സെപ്റ്റംബർ','ഒക്ടോബർ','നവംബർ','ഡിസംബർ'];
 const ym=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
 const isoDay=d=>ym(d)+'-'+String(d.getDate()).padStart(2,'0');
@@ -715,7 +678,6 @@ function attPanel(){
   return h+'<button class="cta" style="max-width:none;margin-top:8px" onclick="atSave()">ഹാജർ സേവ് ചെയ്യുക</button>';
 }
 
-/* ---------- Library ---------- */
 const KL={book:'മദ്റസ Book / Notes',syll:'Syllabus'};
 let LB={step:'menu',kind:'',items:null,subs:[]};
 async function fileBlob(col,f){
@@ -836,7 +798,6 @@ function liveView(){
   return h+'</section>';
 }
 
-/* ---------- Quiz game ---------- */
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const starI=on=>ico('star').replace('class="i"','class="i star'+(on?' on':'')+'"');
 let QZ={step:'sub',subs:null,sub:'',subn:'',chs:null,ch:'',all:[],qs:[],i:0,sc:0,pts:0,st:0,pick:-1,wrong:[]};
@@ -911,7 +872,6 @@ function quizView(){
   return h+'</section>';
 }
 
-/* ---------- Quiz admin ---------- */
 let QA={sub:'',ch:'',meta:null,qs:null,ed:''};
 async function qaLoad(){
   if(!QA.sub){render();return}
@@ -1001,7 +961,6 @@ function quizPanel(){
   return h;
 }
 
-/* ---------- Quran audio ---------- */
 const SU=[['الفاتحة','Al-Fatihah'],['البقرة','Al-Baqarah'],['آل عمران','Aal-Imran'],['النساء','An-Nisa'],['المائدة','Al-Maidah'],['الأنعام','Al-Anam'],['الأعراف','Al-Araf'],['الأنفال','Al-Anfal'],['التوبة','At-Tawbah'],['يونس','Yunus'],['هود','Hud'],['يوسف','Yusuf'],['الرعد','Ar-Rad'],['إبراهيم','Ibrahim'],['الحجر','Al-Hijr'],['النحل','An-Nahl'],['الإسراء','Al-Isra'],['الكهف','Al-Kahf'],['مريم','Maryam'],['طه','Ta-Ha'],['الأنبياء','Al-Anbiya'],['الحج','Al-Hajj'],['المؤمنون','Al-Muminun'],['النور','An-Nur'],['الفرقان','Al-Furqan'],['الشعراء','Ash-Shuara'],['النمل','An-Naml'],['القصص','Al-Qasas'],['العنكبوت','Al-Ankabut'],['الروم','Ar-Rum'],['لقمان','Luqman'],['السجدة','As-Sajdah'],['الأحزاب','Al-Ahzab'],['سبأ','Saba'],['فاطر','Fatir'],['يس','Ya-Sin'],['الصافات','As-Saffat'],['ص','Sad'],['الزمر','Az-Zumar'],['غافر','Ghafir'],['فصلت','Fussilat'],['الشورى','Ash-Shura'],['الزخرف','Az-Zukhruf'],['الدخان','Ad-Dukhan'],['الجاثية','Al-Jathiyah'],['الأحقاف','Al-Ahqaf'],['محمد','Muhammad'],['الفتح','Al-Fath'],['الحجرات','Al-Hujurat'],['ق','Qaf'],['الذاريات','Adh-Dhariyat'],['الطور','At-Tur'],['النجم','An-Najm'],['القمر','Al-Qamar'],['الرحمن','Ar-Rahman'],['الواقعة','Al-Waqiah'],['الحديد','Al-Hadid'],['المجادلة','Al-Mujadila'],['الحشر','Al-Hashr'],['الممتحنة','Al-Mumtahanah'],['الصف','As-Saff'],['الجمعة','Al-Jumuah'],['المنافقون','Al-Munafiqun'],['التغابن','At-Taghabun'],['الطلاق','At-Talaq'],['التحريم','At-Tahrim'],['الملك','Al-Mulk'],['القلم','Al-Qalam'],['الحاقة','Al-Haqqah'],['المعارج','Al-Maarij'],['نوح','Nuh'],['الجن','Al-Jinn'],['المزمل','Al-Muzzammil'],['المدثر','Al-Muddaththir'],['القيامة','Al-Qiyamah'],['الإنسان','Al-Insan'],['المرسلات','Al-Mursalat'],['النبأ','An-Naba'],['النازعات','An-Naziat'],['عبس','Abasa'],['التكوير','At-Takwir'],['الانفطار','Al-Infitar'],['المطففين','Al-Mutaffifin'],['الانشقاق','Al-Inshiqaq'],['البروج','Al-Buruj'],['الطارق','At-Tariq'],['الأعلى','Al-Ala'],['الغاشية','Al-Ghashiyah'],['الفجر','Al-Fajr'],['البلد','Al-Balad'],['الشمس','Ash-Shams'],['الليل','Al-Layl'],['الضحى','Ad-Duha'],['الشرح','Ash-Sharh'],['التين','At-Tin'],['العلق','Al-Alaq'],['القدر','Al-Qadr'],['البينة','Al-Bayyinah'],['الزلزلة','Az-Zalzalah'],['العاديات','Al-Adiyat'],['القارعة','Al-Qariah'],['التكاثر','At-Takathur'],['العصر','Al-Asr'],['الهمزة','Al-Humazah'],['الفيل','Al-Fil'],['قريش','Quraysh'],['الماعون','Al-Maun'],['الكوثر','Al-Kawthar'],['الكافرون','Al-Kafirun'],['النصر','An-Nasr'],['المسد','Al-Masad'],['الإخلاص','Al-Ikhlas'],['الفلق','Al-Falaq'],['الناس','An-Nas']];
 const p3=n=>String(n).padStart(3,'0');
 const AU=new Audio();AU.preload='none';
@@ -1056,7 +1015,6 @@ function qNext(d){
   if(m)qPlay(m);else{AU.pause();render()}
 }
 
-/* ---------- Quran admin ---------- */
 function lstQ(){
   const a=A('quran').slice().sort((x,y)=>(x.sn||0)-(y.sn||0));
   if(!a.length)return '<div class="empty">ഒന്നുമില്ല. ചേർക്കൂ.</div>';
@@ -1107,7 +1065,6 @@ async function delSu(id){
   refresh();
 }
 
-/* ---------- Settings ---------- */
 const FONTS=[
  ['def','ഡിഫോൾട്ട് (Outfit)','','"Outfit","Noto Sans Malayalam",system-ui,sans-serif'],
  ['manjari','Manjari (മഞ്ജരി)','Manjari:wght@400;700','"Manjari","Noto Sans Malayalam",sans-serif'],
@@ -1156,7 +1113,6 @@ function setView(){
 }
 applySet();
 
-/* ---------- YouTube videos ---------- */
 function ytId(u){
   const m=String(u||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{11})/);
   return m?m[1]:'';
@@ -1191,7 +1147,6 @@ function ytView(){
   return h+'<div class="ygrid">'+LST.map(ytCard).join('')+'</div></section>';
 }
 
-/* ---------- shell ---------- */
 let MEF=false;
 function goBack(){go(BK)}
 function navTo(k){BK='home';if(k==='quiz')openQuiz();else openQuran()}
@@ -1350,7 +1305,7 @@ function render(){
   car();anim();
 }
 
-Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu,uploadPhoto,removePhoto});
+Object.assign(window,{goBack,navTo,meOut,ytPlay,ytBack,setOpt,clearFiles,amToggle,qClose,doInstall,helpClose,go,doLogin,doAdmin,out,tap,openList,sec,edit,del,saveI,pick,gid,waRead,waT,waGo,waCopy,render,dots,stopCar,openMP,mpBack,mpSub,mpPaper,mpOpen,saveP,delP,saveT,delT,tfOpen,atMove,atSel,atMark,atAll,atSave,libPick,libBack,libOpen,saveL,delL,openQuiz,qzSub,qzCh,qzStart,qzAns,qzNext,qzBack,qaSel,qaChip,qaEdit,saveQz,bulkQz,delQz,delCh,openQuran,qPlay,qToggle,qSeek,qNext,saveQC,saveSu,applySu,delSu,uploadPhoto,removePhoto, sendPush});
 
 window.addEventListener('popstate', function(e) {
   window.IS_POPPING = true; 
@@ -1369,7 +1324,8 @@ window.addEventListener('popstate', function(e) {
   
   setTimeout(() => { window.IS_POPPING = false; }, 50);
 });
-const VAPID_KEY = "BGdbdmmfTvVhnq3s8XDDvPdTFBdBQE3BxO0DtL0FzIX_CT_mukKwUjPizo2zEp8KuNqrdMj95v-r9gKnm7okPS8"; // ⚠️ ഇവിടെ നിങ്ങളുടെ VAPID Key നൽകുക
+
+const VAPID_KEY = "BGdbdmmfTvVhnq3s8XDDvPdTFBdBQE3BxO0DtL0FzIX_CT_mukKwUjPizo2zEp8KuNqrdMj95v-r9gKnm7okPS8";
 
 async function setupNotifications() {
   if (!('Notification' in window)) return;
@@ -1389,6 +1345,7 @@ async function setupNotifications() {
     console.error('Notification setup failed:', error);
   }
 }
+
 async function sendPush(){
   const title = $('n_t').value.trim();
   const body = $('n_b').value.trim();
@@ -1405,7 +1362,8 @@ async function sendPush(){
   } catch(e) {
     toast('കോപ്പി ചെയ്യാൻ കഴിഞ്ഞില്ല. ദയവായി മാനുവലായി എടുക്കുക.');
   }
-    }
+}
+
 async function boot(){
   render();
   const u=await tmo(new Promise(r=>{const f=onAuthStateChanged(auth,x=>{f();r(x)})}),8000).catch(()=>null);
@@ -1421,7 +1379,7 @@ async function boot(){
   }
   if(me){ 
   await loadHome(); 
-  setupNotifications(); // 👈 ഈ വരി മാത്രം പുതിയതായി ചേർക്കുക
+  setupNotifications();
   return; 
 }
   if(adm&&location.hash!=='#admin'){go('admin');return}
