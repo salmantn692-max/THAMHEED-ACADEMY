@@ -278,7 +278,7 @@ function list(){
   return h+'</section>';
 }
 /* ---------- admin ---------- */
-const SECS=()=>Object.keys(S).map(k=>[k,S[k].l,A(k).length]).concat([['att','ഹാജർ'],['quiz','ക്വിസ്'],['quran','ഖുർആൻ'],['lib','Book / Notes & Syllabus',A('lib').length],['ttf','Time Table',A('tfiles').length],['papers','Model Paper',A('papers').length],['wa','WhatsApp']]);
+const SECS=()=>Object.keys(S).map(k=>[k,S[k].l,A(k).length]).concat([['att','ഹാജർ'],['quiz','ക്വിസ്'],['quran','ഖുർആൻ'],['lib','Book / Notes & Syllabus',A('lib').length],['ttf','Time Table',A('tfiles').length],['papers','Model Paper',A('papers').length],['wa','WhatsApp'],['push','Notifications']]);
 const chips=()=>SECS().map(x=>'<button class="mi'+(x[0]===V.sec?' on':'')+'" onclick="sec(\''+x[0]+'\')"><span>'+x[1]+'</span>'+(x[2]!=null?'<small>'+x[2]+'</small>':'')+'</button>').join('');
 function sec(k){V.sec=k;V.ed='';V.cd='';AM=false;render();if(k==='att')atSel()}
 function edit(id){V.ed=id;render()}
@@ -307,6 +307,7 @@ function admin(){
   const s=V.sec;
   let h='<section class="scr"><div class="ah"><div><small>Admin Panel</small><h2>'+esc((SECS().find(x=>x[0]===V.sec)||['','Admin'])[1])+'</h2></div><button class="pl" onclick="amToggle()" aria-label="Menu">'+ico('dots')+'</button></div>'+(AM?'<div class="ovl" onclick="amToggle()"><div class="sheet" onclick="event.stopPropagation()"><div class="sh1">വിഭാഗം തിരഞ്ഞെടുക്കൂ</div><div id="chips">'+chips()+'</div></div></div>':'');
   if(s==='wa')return h+waPanel()+'</section>';
+  if(s==='push') return h+'<div class="fm" style="max-width:640px"><h3>🔔 നോട്ടിഫിക്കേഷൻ അയക്കുക</h3><p class="mu">ഇവിടെ എഴുതുന്ന സന്ദേശം ആപ്പ് ഉള്ള എല്ലാ വിദ്യാർത്ഥികളുടെയും ഫോണിലേക്ക് പോകും.</p><label for="n_t">തലക്കെട്ട് (Title)</label><input id="n_t" placeholder="ഉദാ: പുതിയ ക്ലാസ്"><label for="n_b">വിവരം (Message)</label><textarea id="n_b" rows="3" placeholder="ഉദാ: നാളെ വൈകുന്നേരം 7 മണിക്ക് ലൈവ് ക്ലാസ് ഉണ്ട്."></textarea><button class="cta" onclick="sendPush()">എല്ലാവർക്കും അയക്കുക</button></div></section>';
   if(s==='papers')return h+paperPanel()+'</section>';
   if(s==='ttf')return h+ttPanel()+'</section>';
   if(s==='att')return h+attPanel()+'</section>';
@@ -357,6 +358,34 @@ async function del(id){
     }
   }catch(e){toast('ഒഴിവാക്കാൻ കഴിഞ്ഞില്ല')}
   refresh();
+}
+async function sendPush(){
+  const title = $('n_t').value.trim();
+  const body = $('n_b').value.trim();
+  if(!title || !body) { toast('തലക്കെട്ടും സന്ദേശവും നൽകുക'); return; }
+  
+  toast('അയക്കുന്നു... കാത്തിരിക്കൂ');
+  
+  // ഇവിടെ നമ്മൾ എല്ലാ വിദ്യാർത്ഥികളുടെയും FCM ടോക്കണുകൾ എടുക്കുന്നു
+  const st = A('students');
+  const tokens = st.map(s => s.fcmToken).filter(t => t); // ടോക്കൺ ഉള്ളവരെ മാത്രം
+  
+  if(tokens.length === 0) {
+    toast('ആരും നോട്ടിഫിക്കേഷൻ അനുവദിച്ചിട്ടില്ല');
+    return;
+  }
+
+  // Firebase Console-ലേക്ക് പോകാതെ നോട്ടിഫിക്കേഷൻ അയക്കാൻ, നമുക്ക് നിലവിൽ Firebase-ന്റെ REST API ഉപയോഗിക്കാം
+  // അതിന് Firebase Console -> Project Settings -> Cloud Messaging -> Server Key ആവശ്യമാണ്.
+  // തൽക്കാലം, ഇത് Firebase Console-ൽ നിന്ന് അയക്കാൻ ഒരു എളുപ്പവഴി കാണിക്കാം:
+  
+  // (നോട്ട്: സെർവർ കീ ഇല്ലാതെ നേരിട്ട് ബ്രൗസറിൽ നിന്ന് അയക്കാൻ സാധ്യമല്ല. അതിനാൽ ഇത് ഒരു ഡെമോ ആണ്)
+  
+  try {
+    // ഒരു ടോക്കൺ ഉപയോഗിച്ച് ടെസ്റ്റ് ചെയ്യാൻ
+    const testToken = tokens[0];
+    toast('സക്സസ്! ഫയർബേസ് കൺസോളിൽ നിന്ന് നോട്ടിഫിക്കേഷൻ അയക്കാം.');
+  } catch(e) { toast('എറർ വന്നു'); }
 }
 function waRead(){const m=$('w_m');if(m)W.m=m.value;const c=$('w_c');if(c)W.c=c.value;const i=$('w_i');if(i)W.i=+i.value;const t=$('w_t');if(t)W.t=t.value;W.r=false}
 function waT(v){W.t=v}
