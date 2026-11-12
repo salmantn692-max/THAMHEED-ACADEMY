@@ -1389,6 +1389,23 @@ async function setupNotifications() {
     console.error('Notification setup failed:', error);
   }
 }
+async function sendPush(){
+  const title = $('n_t').value.trim();
+  const body = $('n_b').value.trim();
+  if(!title || !body) { toast('തലക്കെട്ടും സന്ദേശവും നൽകുക'); return; }
+  
+  const msg = `Title: ${title}\nMessage: ${body}`;
+  
+  try {
+    await navigator.clipboard.writeText(msg);
+    toast('സന്ദേശം കോപ്പി ചെയ്തു! ഫയർബേസിൽ പോയി അയക്കൂ.');
+    setTimeout(() => {
+      window.open('https://console.firebase.google.com/', '_blank');
+    }, 1500);
+  } catch(e) {
+    toast('കോപ്പി ചെയ്യാൻ കഴിഞ്ഞില്ല. ദയവായി മാനുവലായി എടുക്കുക.');
+  }
+    }
 async function boot(){
   render();
   const u=await tmo(new Promise(r=>{const f=onAuthStateChanged(auth,x=>{f();r(x)})}),8000).catch(()=>null);
