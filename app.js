@@ -1402,7 +1402,11 @@ async function boot(){
       }
     }catch(e){console.error(e)}
   }
-  if(me){await loadHome();return}
+  if(me){ 
+  await loadHome(); 
+  setupNotifications(); // 👈 ഈ വരി മാത്രം പുതിയതായി ചേർക്കുക
+  return; 
+}
   if(adm&&location.hash!=='#admin'){go('admin');return}
   go(location.hash==='#admin'?(adm?'admin':'adminlogin'):'splash');
 }
