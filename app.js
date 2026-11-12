@@ -721,7 +721,11 @@ function libView(){
   const l=LB.items.filter(x=>x.kind===LB.kind);
   h+='<h2 class="mh">'+KL[LB.kind]+'</h2>';
   if(!l.length)return h+'<div class="cs" style="margin-top:16px">Coming soon</div></section>';
-  const row=x=>'<div class="ol"><div class="n">'+ico('file')+'</div><div class="t">'+esc(x.title)+'</div><button class="pl" onclick="libOpen(\''+x._id+'\',1)" aria-label="Share">'+ico('share')+'</button><button class="pl" onclick="libOpen(\''+x._id+'\',0)" aria-label="Open">'+ico('eye')+'</button></div>';
+  
+  // 👇 ഇവിടെയാണ് മാറ്റം വരുത്തിയത് 👇
+  const row=x=>'<div class="ol" onclick="libOpen(\''+x._id+'\',0)" style="cursor:pointer;"><div class="n">'+ico('file')+'</div><div class="t">'+esc(x.title)+'</div><button class="pl" onclick="event.stopPropagation(); libOpen(\''+x._id+'\',1)" aria-label="Share">'+ico('share')+'</button></div>';
+  // 👆 --------------------------------- 👆
+
   if(LB.kind==='book'){
     const g={};l.forEach(x=>{(g[x.sub||'']=g[x.sub||'']||[]).push(x)});
     Object.keys(g).forEach(k=>{const s=LB.subs.find(z=>z._id===k);h+='<div class="eh"><span>'+esc(s?s.name:'മറ്റുള്ളവ')+'</span><span class="bd">'+g[k].length+'</span></div>'+g[k].map(row).join('')});
