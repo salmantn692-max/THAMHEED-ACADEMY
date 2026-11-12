@@ -7,7 +7,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid rgba(98,93,128,.45);outline-offset:2px}
 svg.i{width:22px;height:22px;flex:none}
 .app{max-width:440px;margin:0 auto;min-height:100%;position:relative}
-.scr{padding:20px 20px 120px}
+.scr{padding:20px 20px 140px}
 
 /* login / splash */
 .hero{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;min-height:100svh}
