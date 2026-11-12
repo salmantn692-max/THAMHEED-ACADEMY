@@ -468,3 +468,81 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
 .top,.bar{position:sticky;top:0;z-index:6;background:var(--bg);margin:calc(-20px - env(safe-area-inset-top,0px)) -20px 14px;padding:calc(20px + env(safe-area-inset-top,0px)) 20px 12px}
 .top{box-shadow:0 10px 12px -12px rgba(0,0,0,.28)}
 @media (min-width:900px){.top,.bar{margin:-36px -40px 18px;padding:36px 40px 12px}}
+/* =========================================
+   APP-WIDE PREMIUM ANIMATIONS
+   ========================================= */
+
+/* 1. പേജ് ട്രാൻസിഷൻ (Page Fade & Slide) */
+@keyframes pageSlide {
+  0% { opacity: 0; transform: translateY(15px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.app.anim .scr {
+  animation: pageSlide 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* 2. ലിസ്റ്റ് ഐറ്റങ്ങളുടെ സ്റ്റാഗേർഡ് ആനിമേഷൻ (Staggered List) */
+@keyframes itemFadeUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.app.anim .ol, 
+.app.anim .cc, 
+.app.anim .px, 
+.app.anim .sr {
+  animation: itemFadeUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+/* ഓരോ ഐറ്റത്തിനും ചെറിയ വ്യത്യാസത്തിൽ വരാൻ (Delay) */
+.app.anim .ol:nth-child(1), .app.anim .cc:nth-child(1), .app.anim .px:nth-child(1), .app.anim .sr:nth-child(1) { animation-delay: 0.05s; }
+.app.anim .ol:nth-child(2), .app.anim .cc:nth-child(2), .app.anim .px:nth-child(2), .app.anim .sr:nth-child(2) { animation-delay: 0.1s; }
+.app.anim .ol:nth-child(3), .app.anim .cc:nth-child(3), .app.anim .px:nth-child(3), .app.anim .sr:nth-child(3) { animation-delay: 0.15s; }
+.app.anim .ol:nth-child(4), .app.anim .cc:nth-child(4), .app.anim .px:nth-child(4), .app.anim .sr:nth-child(4) { animation-delay: 0.2s; }
+.app.anim .ol:nth-child(5), .app.anim .cc:nth-child(5), .app.anim .px:nth-child(5), .app.anim .sr:nth-child(5) { animation-delay: 0.25s; }
+.app.anim .ol:nth-child(n+6), .app.anim .cc:nth-child(n+6), .app.anim .px:nth-child(n+6), .app.anim .sr:nth-child(n+6) { animation-delay: 0.3s; }
+
+/* 3. സ്കെലെറ്റൺ ഷിമ്മർ (Skeleton Shimmer) */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.sk i {
+  background: linear-gradient(90deg, var(--soft) 25%, var(--line) 50%, var(--soft) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 8px;
+}
+
+/* 4. മൈക്രോ-ഇന്ററാക്ഷനുകൾ (Buttons & Tiles Press Effect) */
+.cc, .ol, .px, .cta, button {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+}
+.cc:active, .ol:active, .px:active, .cta:active, nav button:active {
+  transform: scale(0.95); /* അമർത്തുമ്പോൾ ചെറുതാകാൻ */
+}
+.pl:active {
+  transform: scale(0.85);
+}
+
+/* 5. ബോട്ടം നാവിഗേഷൻ ഇൻഡിക്കേറ്റർ അനിമേഷൻ */
+nav button::after {
+  transition: width 0.3s ease, left 0.3s ease, background 0.3s ease;
+}
+
+/* 6. പോപ്പ്-അപ്പ് / മോഡൽ ആനിമേഷനുകൾ */
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+.sheet, .fm {
+  animation: popIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* ആനിമേഷനുകൾ ഓഫ് ചെയ്യാൻ (Accessibility) */
+@media (prefers-reduced-motion: reduce) {
+  .app.anim .scr, .app.anim .ol, .app.anim .cc, .app.anim .px, .app.anim .sr, .sk i, .sheet, .fm {
+    animation: none !important;
+  }
+  .cc:active, .ol:active, .px:active, .cta:active, nav button:active {
+    transform: none !important;
+  }
+}
